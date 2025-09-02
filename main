@@ -1,108 +1,141 @@
 local player = game:GetService("Players").LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 
--- Panel yok! Sadece yüzen bir grup buton
 local gui = Instance.new("ScreenGui", player.PlayerGui)
-gui.Name = "FloatingButtons"
+gui.Name = "MobileClickerGUI"
 gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true
 
-local buttonGroup = Instance.new("Frame", gui)
-buttonGroup.Name = "ButtonGroup"
-buttonGroup.BackgroundTransparency = 0.2
-buttonGroup.BackgroundColor3 = Color3.fromRGB(36,46,56)
-buttonGroup.BorderSizePixel = 0
-buttonGroup.Size = UDim2.new(0,56,0,250)
-buttonGroup.Position = UDim2.new(0.92,0,0.37,0)
-buttonGroup.Active = true
-buttonGroup.Draggable = true
+-- Ana Mobil Buton Paneli
+local panel = Instance.new("Frame", gui)
+panel.BackgroundColor3 = Color3.fromRGB(40,40,60)
+panel.Size = UDim2.new(0,210,0,170)
+panel.Position = UDim2.new(0.05,0,0.6,0)
+panel.Active = true
+panel.Draggable = true
 
--- 1. Ring Toggle Butonu
-local ringBtn = Instance.new("TextButton", buttonGroup)
-ringBtn.Size = UDim2.new(1,0,0,56)
-ringBtn.Position = UDim2.new(0,0,0,0)
-ringBtn.BackgroundColor3 = Color3.fromRGB(60,110,180)
-ringBtn.BackgroundTransparency = 0.15
-ringBtn.Text = "🟢"
-ringBtn.TextSize = 36
+local title = Instance.new("TextLabel", panel)
+title.Text = "🟢 Mobile Clicker"
+title.Size = UDim2.new(1,0,0,28)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(190,230,255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.Position = UDim2.new(0,0,0,2)
+
+-- Halka göster/gizle
+local ringBtn = Instance.new("TextButton", panel)
+ringBtn.Size = UDim2.new(0,100,0,30)
+ringBtn.Position = UDim2.new(0,10,0,38)
+ringBtn.BackgroundColor3 = Color3.fromRGB(90,170,180)
+ringBtn.Text = "Halka Aç/Kapa"
+ringBtn.TextColor3 = Color3.fromRGB(250,255,255)
 ringBtn.Font = Enum.Font.GothamBold
-ringBtn.TextColor3 = Color3.new(1,1,1)
+ringBtn.TextSize = 15
 
--- 2. AutoClicker Toggle
-local clickBtn = Instance.new("TextButton", buttonGroup)
-clickBtn.Size = UDim2.new(1,0,0,56)
-clickBtn.Position = UDim2.new(0,0,0,64)
-clickBtn.BackgroundColor3 = Color3.fromRGB(80,180,120)
-clickBtn.BackgroundTransparency = 0.15
-clickBtn.Text = "⚡"
-clickBtn.TextSize = 32
-clickBtn.Font = Enum.Font.GothamBold
-clickBtn.TextColor3 = Color3.new(1,1,1)
+-- Clicker aç/kapa
+local clickerBtn = Instance.new("TextButton", panel)
+clickerBtn.Size = UDim2.new(0,90,0,30)
+clickerBtn.Position = UDim2.new(0,110,0,38)
+clickerBtn.BackgroundColor3 = Color3.fromRGB(40,180,100)
+clickerBtn.Text = "Clicker: Kapalı"
+clickerBtn.TextColor3 = Color3.fromRGB(230,255,230)
+clickerBtn.Font = Enum.Font.GothamBold
+clickerBtn.TextSize = 14
 
--- 3. Infinite Jump Toggle
-local jumpBtn = Instance.new("TextButton", buttonGroup)
-jumpBtn.Size = UDim2.new(1,0,0,56)
-jumpBtn.Position = UDim2.new(0,0,0,128)
-jumpBtn.BackgroundColor3 = Color3.fromRGB(110,100,180)
-jumpBtn.BackgroundTransparency = 0.15
-jumpBtn.Text = "↕️"
-jumpBtn.TextSize = 30
-jumpBtn.Font = Enum.Font.GothamBold
-jumpBtn.TextColor3 = Color3.new(1,1,1)
-
--- 4. Ayar/Speed
-local speedBox = Instance.new("TextBox", buttonGroup)
-speedBox.Size = UDim2.new(1,0,0,44)
-speedBox.Position = UDim2.new(0,0,0,192)
-speedBox.BackgroundColor3 = Color3.fromRGB(45,55,65)
+-- Hız ayarı
+local speedBox = Instance.new("TextBox", panel)
+speedBox.Size = UDim2.new(0,60,0,25)
+speedBox.Position = UDim2.new(0,10,0,80)
+speedBox.BackgroundColor3 = Color3.fromRGB(60,70,90)
 speedBox.Text = "100"
-speedBox.PlaceholderText = "Speed(ms)"
-speedBox.TextColor3 = Color3.new(1,1,1)
+speedBox.TextColor3 = Color3.fromRGB(220,250,250)
 speedBox.Font = Enum.Font.Gotham
-speedBox.TextSize = 16
+speedBox.TextSize = 14
+speedBox.ClearTextOnFocus = false
 
--- Ring (Halka)
+local speedLabel = Instance.new("TextLabel", panel)
+speedLabel.Text = "Hız (ms)"
+speedLabel.Size = UDim2.new(0,50,0,24)
+speedLabel.Position = UDim2.new(0,75,0,80)
+speedLabel.BackgroundTransparency = 1
+speedLabel.TextColor3 = Color3.fromRGB(190,230,255)
+speedLabel.Font = Enum.Font.Gotham
+speedLabel.TextSize = 14
+
+-- Multi Tıklama
+local multiBox = Instance.new("TextBox", panel)
+multiBox.Size = UDim2.new(0,38,0,25)
+multiBox.Position = UDim2.new(0,130,0,80)
+multiBox.BackgroundColor3 = Color3.fromRGB(60,70,90)
+multiBox.Text = "1"
+multiBox.TextColor3 = Color3.fromRGB(220,250,250)
+multiBox.Font = Enum.Font.Gotham
+multiBox.TextSize = 14
+multiBox.ClearTextOnFocus = false
+
+local multiLabel = Instance.new("TextLabel", panel)
+multiLabel.Text = "Multi"
+multiLabel.Size = UDim2.new(0,36,0,24)
+multiLabel.Position = UDim2.new(0,172,0,80)
+multiLabel.BackgroundTransparency = 1
+multiLabel.TextColor3 = Color3.fromRGB(190,230,255)
+multiLabel.Font = Enum.Font.Gotham
+multiLabel.TextSize = 14
+
+-- Infinite Jump Butonu
+local jumpBtn = Instance.new("TextButton", panel)
+jumpBtn.Size = UDim2.new(0,160,0,28)
+jumpBtn.Position = UDim2.new(0,10,0,120)
+jumpBtn.BackgroundColor3 = Color3.fromRGB(80,70,180)
+jumpBtn.Text = "Infinite Jump: Kapalı"
+jumpBtn.TextColor3 = Color3.fromRGB(230,230,255)
+jumpBtn.Font = Enum.Font.GothamBold
+jumpBtn.TextSize = 14
+
+-- Halka
 local ring = Instance.new("ImageButton", gui)
-ring.Name = "Ring"
 ring.Image = "rbxassetid://6031091006"
 ring.BackgroundTransparency = 1
 ring.Size = UDim2.new(0,70,0,70)
-ring.Position = UDim2.new(0.65,0,0.75,0)
-ring.Visible = false
+ring.Position = UDim2.new(0.63,0,0.6,0)
 ring.Active = true
 ring.Draggable = true
+ring.Visible = false
 
--- Logic Vars
-local ringVisible, autoClick, infiniteJump = false, false, false
+-- Logic
+local ringVisible = false
+local autoClickEnabled = false
 local clickDelay = 0.10
+local multiClickCount = 1
+local infiniteJump = false
 
--- Ring toggle
 ringBtn.MouseButton1Click:Connect(function()
     ringVisible = not ringVisible
     ring.Visible = ringVisible
-    ringBtn.BackgroundColor3 = ringVisible and Color3.fromRGB(20,200,120) or Color3.fromRGB(60,110,180)
 end)
 
--- AutoClicker toggle
-clickBtn.MouseButton1Click:Connect(function()
-    autoClick = not autoClick
-    clickBtn.BackgroundColor3 = autoClick and Color3.fromRGB(240,180,40) or Color3.fromRGB(80,180,120)
-    if autoClick and ringVisible then
+clickerBtn.MouseButton1Click:Connect(function()
+    autoClickEnabled = not autoClickEnabled
+    clickerBtn.Text = autoClickEnabled and "Clicker: Açık" or "Clicker: Kapalı"
+    if autoClickEnabled and ringVisible then
         spawn(function()
-            while autoClick and ringVisible do
+            while autoClickEnabled and ringVisible do
                 local spd = tonumber(speedBox.Text) or 100
-                ring.MouseButton1Click:Fire()
-                wait(math.max(spd/1000, 0.01))
+                local multi = tonumber(multiBox.Text) or 1
+                for i=1, multi do
+                    ring.MouseButton1Click:Fire()
+                end
+                wait(math.max(spd/1000,0.01))
             end
         end)
     end
 end)
 
--- Infinite Jump toggle
 jumpBtn.MouseButton1Click:Connect(function()
     infiniteJump = not infiniteJump
-    jumpBtn.BackgroundColor3 = infiniteJump and Color3.fromRGB(170,60,190) or Color3.fromRGB(110,100,180)
+    jumpBtn.Text = infiniteJump and "Infinite Jump: Açık" or "Infinite Jump: Kapalı"
 end)
+
 UserInputService.JumpRequest:Connect(function()
     if infiniteJump then
         local char = player.Character
@@ -110,9 +143,4 @@ UserInputService.JumpRequest:Connect(function()
             char:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
         end
     end
-end)
-
--- SpeedBox değişikliği
-speedBox.FocusLost:Connect(function()
-    clickDelay = tonumber(speedBox.Text) or 0.10
 end)
