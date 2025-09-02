@@ -1,0 +1,118 @@
+local player = game:GetService("Players").LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+
+-- Panel yok! Sadece yüzen bir grup buton
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "FloatingButtons"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+
+local buttonGroup = Instance.new("Frame", gui)
+buttonGroup.Name = "ButtonGroup"
+buttonGroup.BackgroundTransparency = 0.2
+buttonGroup.BackgroundColor3 = Color3.fromRGB(36,46,56)
+buttonGroup.BorderSizePixel = 0
+buttonGroup.Size = UDim2.new(0,56,0,250)
+buttonGroup.Position = UDim2.new(0.92,0,0.37,0)
+buttonGroup.Active = true
+buttonGroup.Draggable = true
+
+-- 1. Ring Toggle Butonu
+local ringBtn = Instance.new("TextButton", buttonGroup)
+ringBtn.Size = UDim2.new(1,0,0,56)
+ringBtn.Position = UDim2.new(0,0,0,0)
+ringBtn.BackgroundColor3 = Color3.fromRGB(60,110,180)
+ringBtn.BackgroundTransparency = 0.15
+ringBtn.Text = "🟢"
+ringBtn.TextSize = 36
+ringBtn.Font = Enum.Font.GothamBold
+ringBtn.TextColor3 = Color3.new(1,1,1)
+
+-- 2. AutoClicker Toggle
+local clickBtn = Instance.new("TextButton", buttonGroup)
+clickBtn.Size = UDim2.new(1,0,0,56)
+clickBtn.Position = UDim2.new(0,0,0,64)
+clickBtn.BackgroundColor3 = Color3.fromRGB(80,180,120)
+clickBtn.BackgroundTransparency = 0.15
+clickBtn.Text = "⚡"
+clickBtn.TextSize = 32
+clickBtn.Font = Enum.Font.GothamBold
+clickBtn.TextColor3 = Color3.new(1,1,1)
+
+-- 3. Infinite Jump Toggle
+local jumpBtn = Instance.new("TextButton", buttonGroup)
+jumpBtn.Size = UDim2.new(1,0,0,56)
+jumpBtn.Position = UDim2.new(0,0,0,128)
+jumpBtn.BackgroundColor3 = Color3.fromRGB(110,100,180)
+jumpBtn.BackgroundTransparency = 0.15
+jumpBtn.Text = "↕️"
+jumpBtn.TextSize = 30
+jumpBtn.Font = Enum.Font.GothamBold
+jumpBtn.TextColor3 = Color3.new(1,1,1)
+
+-- 4. Ayar/Speed
+local speedBox = Instance.new("TextBox", buttonGroup)
+speedBox.Size = UDim2.new(1,0,0,44)
+speedBox.Position = UDim2.new(0,0,0,192)
+speedBox.BackgroundColor3 = Color3.fromRGB(45,55,65)
+speedBox.Text = "100"
+speedBox.PlaceholderText = "Speed(ms)"
+speedBox.TextColor3 = Color3.new(1,1,1)
+speedBox.Font = Enum.Font.Gotham
+speedBox.TextSize = 16
+
+-- Ring (Halka)
+local ring = Instance.new("ImageButton", gui)
+ring.Name = "Ring"
+ring.Image = "rbxassetid://6031091006"
+ring.BackgroundTransparency = 1
+ring.Size = UDim2.new(0,70,0,70)
+ring.Position = UDim2.new(0.65,0,0.75,0)
+ring.Visible = false
+ring.Active = true
+ring.Draggable = true
+
+-- Logic Vars
+local ringVisible, autoClick, infiniteJump = false, false, false
+local clickDelay = 0.10
+
+-- Ring toggle
+ringBtn.MouseButton1Click:Connect(function()
+    ringVisible = not ringVisible
+    ring.Visible = ringVisible
+    ringBtn.BackgroundColor3 = ringVisible and Color3.fromRGB(20,200,120) or Color3.fromRGB(60,110,180)
+end)
+
+-- AutoClicker toggle
+clickBtn.MouseButton1Click:Connect(function()
+    autoClick = not autoClick
+    clickBtn.BackgroundColor3 = autoClick and Color3.fromRGB(240,180,40) or Color3.fromRGB(80,180,120)
+    if autoClick and ringVisible then
+        spawn(function()
+            while autoClick and ringVisible do
+                local spd = tonumber(speedBox.Text) or 100
+                ring.MouseButton1Click:Fire()
+                wait(math.max(spd/1000, 0.01))
+            end
+        end)
+    end
+end)
+
+-- Infinite Jump toggle
+jumpBtn.MouseButton1Click:Connect(function()
+    infiniteJump = not infiniteJump
+    jumpBtn.BackgroundColor3 = infiniteJump and Color3.fromRGB(170,60,190) or Color3.fromRGB(110,100,180)
+end)
+UserInputService.JumpRequest:Connect(function()
+    if infiniteJump then
+        local char = player.Character
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            char:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+        end
+    end
+end)
+
+-- SpeedBox değişikliği
+speedBox.FocusLost:Connect(function()
+    clickDelay = tonumber(speedBox.Text) or 0.10
+end)
