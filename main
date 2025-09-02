@@ -5,11 +5,11 @@ local gui = Instance.new("ScreenGui", player.PlayerGui)
 gui.Name = "MobileClickerGUI"
 gui.ResetOnSpawn = false
 
--- Ana Mobil Buton Paneli
+-- Panel
 local panel = Instance.new("Frame", gui)
 panel.BackgroundColor3 = Color3.fromRGB(40,40,60)
-panel.Size = UDim2.new(0,210,0,170)
-panel.Position = UDim2.new(0.05,0,0.6,0)
+panel.Size = UDim2.new(0,230,0,160)
+panel.Position = UDim2.new(0.04,0,0.7,0)
 panel.Active = true
 panel.Draggable = true
 
@@ -22,61 +22,51 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 title.Position = UDim2.new(0,0,0,2)
 
--- Halka göster/gizle
-local ringBtn = Instance.new("TextButton", panel)
-ringBtn.Size = UDim2.new(0,100,0,30)
-ringBtn.Position = UDim2.new(0,10,0,38)
-ringBtn.BackgroundColor3 = Color3.fromRGB(90,170,180)
-ringBtn.Text = "Halka Aç/Kapa"
-ringBtn.TextColor3 = Color3.fromRGB(250,255,255)
-ringBtn.Font = Enum.Font.GothamBold
-ringBtn.TextSize = 15
-
--- Clicker aç/kapa
+-- Clicker Aç/Kapa
 local clickerBtn = Instance.new("TextButton", panel)
-clickerBtn.Size = UDim2.new(0,90,0,30)
-clickerBtn.Position = UDim2.new(0,110,0,38)
-clickerBtn.BackgroundColor3 = Color3.fromRGB(40,180,100)
+clickerBtn.Size = UDim2.new(0,130,0,32)
+clickerBtn.Position = UDim2.new(0,14,0,38)
+clickerBtn.BackgroundColor3 = Color3.fromRGB(70,200,120)
 clickerBtn.Text = "Clicker: Kapalı"
-clickerBtn.TextColor3 = Color3.fromRGB(230,255,230)
+clickerBtn.TextColor3 = Color3.fromRGB(20,40,20)
 clickerBtn.Font = Enum.Font.GothamBold
-clickerBtn.TextSize = 14
+clickerBtn.TextSize = 17
 
 -- Hız ayarı
 local speedBox = Instance.new("TextBox", panel)
 speedBox.Size = UDim2.new(0,60,0,25)
-speedBox.Position = UDim2.new(0,10,0,80)
+speedBox.Position = UDim2.new(0,152,0,38)
 speedBox.BackgroundColor3 = Color3.fromRGB(60,70,90)
 speedBox.Text = "100"
 speedBox.TextColor3 = Color3.fromRGB(220,250,250)
 speedBox.Font = Enum.Font.Gotham
-speedBox.TextSize = 14
+speedBox.TextSize = 15
 speedBox.ClearTextOnFocus = false
 
-local speedLabel = Instance.new("TextLabel", panel)
-speedLabel.Text = "Hız (ms)"
-speedLabel.Size = UDim2.new(0,50,0,24)
-speedLabel.Position = UDim2.new(0,75,0,80)
-speedLabel.BackgroundTransparency = 1
-speedLabel.TextColor3 = Color3.fromRGB(190,230,255)
-speedLabel.Font = Enum.Font.Gotham
-speedLabel.TextSize = 14
+local lbl = Instance.new("TextLabel", panel)
+lbl.Text = "Hız (ms):"
+lbl.Size = UDim2.new(0,50,0,24)
+lbl.Position = UDim2.new(0,150,0,65)
+lbl.BackgroundTransparency = 1
+lbl.TextColor3 = Color3.fromRGB(190,230,255)
+lbl.Font = Enum.Font.Gotham
+lbl.TextSize = 14
 
 -- Multi Tıklama
 local multiBox = Instance.new("TextBox", panel)
-multiBox.Size = UDim2.new(0,38,0,25)
-multiBox.Position = UDim2.new(0,130,0,80)
+multiBox.Size = UDim2.new(0,40,0,25)
+multiBox.Position = UDim2.new(0,80,0,80)
 multiBox.BackgroundColor3 = Color3.fromRGB(60,70,90)
 multiBox.Text = "1"
 multiBox.TextColor3 = Color3.fromRGB(220,250,250)
 multiBox.Font = Enum.Font.Gotham
-multiBox.TextSize = 14
+multiBox.TextSize = 15
 multiBox.ClearTextOnFocus = false
 
 local multiLabel = Instance.new("TextLabel", panel)
 multiLabel.Text = "Multi"
 multiLabel.Size = UDim2.new(0,36,0,24)
-multiLabel.Position = UDim2.new(0,172,0,80)
+multiLabel.Position = UDim2.new(0,125,0,80)
 multiLabel.BackgroundTransparency = 1
 multiLabel.TextColor3 = Color3.fromRGB(190,230,255)
 multiLabel.Font = Enum.Font.Gotham
@@ -84,53 +74,43 @@ multiLabel.TextSize = 14
 
 -- Infinite Jump Butonu
 local jumpBtn = Instance.new("TextButton", panel)
-jumpBtn.Size = UDim2.new(0,160,0,28)
-jumpBtn.Position = UDim2.new(0,10,0,120)
+jumpBtn.Size = UDim2.new(0,170,0,30)
+jumpBtn.Position = UDim2.new(0,14,0,120)
 jumpBtn.BackgroundColor3 = Color3.fromRGB(80,70,180)
 jumpBtn.Text = "Infinite Jump: Kapalı"
 jumpBtn.TextColor3 = Color3.fromRGB(230,230,255)
 jumpBtn.Font = Enum.Font.GothamBold
-jumpBtn.TextSize = 14
+jumpBtn.TextSize = 15
 
--- Halka
-local ring = Instance.new("ImageButton", gui)
-ring.Image = "rbxassetid://6031091006"
-ring.BackgroundTransparency = 1
-ring.Size = UDim2.new(0,70,0,70)
-ring.Position = UDim2.new(0.63,0,0.6,0)
-ring.Active = true
-ring.Draggable = true
-ring.Visible = false
-
--- Logic
-local ringVisible = false
-local autoClickEnabled = false
-local clickDelay = 0.10
-local multiClickCount = 1
-local infiniteJump = false
-
-ringBtn.MouseButton1Click:Connect(function()
-    ringVisible = not ringVisible
-    ring.Visible = ringVisible
-end)
+-- Clicker Logic
+local running = false
 
 clickerBtn.MouseButton1Click:Connect(function()
-    autoClickEnabled = not autoClickEnabled
-    clickerBtn.Text = autoClickEnabled and "Clicker: Açık" or "Clicker: Kapalı"
-    if autoClickEnabled and ringVisible then
+    running = not running
+    clickerBtn.Text = running and "Clicker: Açık" or "Clicker: Kapalı"
+    if running then
         spawn(function()
-            while autoClickEnabled and ringVisible do
+            while running do
                 local spd = tonumber(speedBox.Text) or 100
                 local multi = tonumber(multiBox.Text) or 1
                 for i=1, multi do
-                    ring.MouseButton1Click:Fire()
+                    -- Gerçek tıklama: Executor destekliyorsa doğrudan!
+                    if mouse1click then
+                        mouse1click()
+                    elseif mouse1press and mouse1release then
+                        mouse1press()
+                        wait(0.02)
+                        mouse1release()
+                    end
                 end
-                wait(math.max(spd/1000,0.01))
+                wait(math.max(spd/1000, 0.01))
             end
         end)
     end
 end)
 
+-- Infinite Jump Logic
+local infiniteJump = false
 jumpBtn.MouseButton1Click:Connect(function()
     infiniteJump = not infiniteJump
     jumpBtn.Text = infiniteJump and "Infinite Jump: Açık" or "Infinite Jump: Kapalı"
@@ -140,7 +120,8 @@ UserInputService.JumpRequest:Connect(function()
     if infiniteJump then
         local char = player.Character
         if char and char:FindFirstChildOfClass("Humanoid") then
-            char:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+            -- Her zıplama tuşuna sonsuz izin!
+            char:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
         end
     end
 end)
