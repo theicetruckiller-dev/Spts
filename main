@@ -1,154 +1,110 @@
-local player = game:GetService("Players").LocalPlayer
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+local p=game:GetService("Players").LocalPlayer
+local vim=game:GetService("VirtualInputManager")
+local gui=Instance.new("ScreenGui",p:WaitForChild("PlayerGui"))
+gui.Name="SPTSAutoClicker"
+gui.ResetOnSpawn=false
+local panel=Instance.new("Frame",gui)
+panel.BackgroundColor3=Color3.fromRGB(40,40,60)
+panel.BackgroundTransparency=0.4
+panel.Size=UDim2.new(0,250,0,180)
+panel.Position=UDim2.new(0.04,0,0.6,0)
+panel.Active=true
+panel.Draggable=true
+local title=Instance.new("TextLabel",panel)
+title.Text="⚡ SPTS Auto Clicker"
+title.Size=UDim2.new(1,0,0,28)
+title.BackgroundTransparency=1
+title.TextColor3=Color3.fromRGB(190,230,255)
+title.Font=Enum.Font.GothamBold
+title.TextSize=18
+local clickerBtn=Instance.new("TextButton",panel)
+clickerBtn.Size=UDim2.new(0,100,0,28)
+clickerBtn.Position=UDim2.new(0,10,0,36)
+clickerBtn.BackgroundColor3=Color3.fromRGB(40,180,100)
+clickerBtn.Text="Clicker: Kapalı"
+clickerBtn.TextColor3=Color3.fromRGB(230,255,230)
+clickerBtn.Font=Enum.Font.GothamBold
+clickerBtn.TextSize=13
+local slotBox=Instance.new("TextBox",panel)
+slotBox.Size=UDim2.new(0,60,0,24)
+slotBox.Position=UDim2.new(0,10,0,70)
+slotBox.BackgroundColor3=Color3.fromRGB(60,70,90)
+slotBox.Text="1"
+slotBox.TextColor3=Color3.fromRGB(220,250,250)
+slotBox.Font=Enum.Font.Gotham
+slotBox.TextSize=14
+slotBox.ClearTextOnFocus=false
+local slotLabel=Instance.new("TextLabel",panel)
+slotLabel.Text="Slot (1-4)"
+slotLabel.Size=UDim2.new(0,80,0,20)
+slotLabel.Position=UDim2.new(0,12,0,94)
+slotLabel.BackgroundTransparency=1
+slotLabel.TextColor3=Color3.fromRGB(190,230,255)
+slotLabel.Font=Enum.Font.Gotham
+slotLabel.TextSize=13
+local speeds={["Hızlı"]=50,["Orta"]=100,["Yavaş"]=300}
+local yPos=130
+local currentSpeed=100
+for n,s in pairs(speeds)do
+ local b=Instance.new("TextButton",panel)
+ b.Size=UDim2.new(0,60,0,28)
+ b.Position=UDim2.new(0,10,0,yPos)
+ b.BackgroundColor3=Color3.fromRGB(70,70,150)
+ b.TextColor3=Color3.fromRGB(230,230,255)
+ b.Font=Enum.Font.GothamBold
+ b.TextSize=14
+ b.Text=n
+ b.MouseButton1Click:Connect(function() currentSpeed=s end)
+ yPos=yPos+32
+end
+local indicator=Instance.new("Frame",gui)
+indicator.Size=UDim2.new(0,30,0,30)
+indicator.Position=UDim2.new(0.5,-15,0.5,-15)
+indicator.BackgroundColor3=Color3.fromRGB(200,80,80)
+indicator.BackgroundTransparency=0.5
+indicator.BorderSizePixel=0
+local UICorner=Instance.new("UICorner",indicator)
+UICorner.CornerRadius=UDim.new(1,0)
+local running=false
 
--- ScreenGui & Panel
-local gui = Instance.new("ScreenGui", player.PlayerGui)
-gui.Name = "MobileRingAutoClicker"
-gui.ResetOnSpawn = false
+-- Küçük toggle buton
+local toggleBtn=Instance.new("TextButton",gui)
+toggleBtn.Size=UDim2.new(0,30,0,30)
+toggleBtn.Position=UDim2.new(0.95,-30,0.05,0)
+toggleBtn.Text="☰"
+toggleBtn.BackgroundColor3=Color3.fromRGB(70,70,70)
+toggleBtn.TextColor3=Color3.fromRGB(230,230,255)
+toggleBtn.Font=Enum.Font.GothamBold
+toggleBtn.TextSize=18
+toggleBtn.Active=true
+toggleBtn.Draggable=true
 
-local panel = Instance.new("Frame", gui)
-panel.BackgroundColor3 = Color3.fromRGB(40,40,60)
-panel.Size = UDim2.new(0,210,0,130)
-panel.Position = UDim2.new(0.04,0,0.7,0)
-panel.Active = true
-panel.Draggable = true
-
-local title = Instance.new("TextLabel", panel)
-title.Text = "🎯 Ring Auto Clicker"
-title.Size = UDim2.new(1,0,0,28)
-title.BackgroundTransparency = 1
-title.TextColor3 = Color3.fromRGB(190,230,255)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 18
-title.Position = UDim2.new(0,0,0,2)
-
--- Halka göster/gizle
-local ringBtn = Instance.new("TextButton", panel)
-ringBtn.Size = UDim2.new(0,120,0,28)
-ringBtn.Position = UDim2.new(0,12,0,36)
-ringBtn.BackgroundColor3 = Color3.fromRGB(90,170,180)
-ringBtn.Text = "Halka Aç/Kapa"
-ringBtn.TextColor3 = Color3.fromRGB(250,255,255)
-ringBtn.Font = Enum.Font.GothamBold
-ringBtn.TextSize = 15
-
--- Clicker aç/kapa
-local clickerBtn = Instance.new("TextButton", panel)
-clickerBtn.Size = UDim2.new(0,90,0,28)
-clickerBtn.Position = UDim2.new(0,134,0,36)
-clickerBtn.BackgroundColor3 = Color3.fromRGB(40,180,100)
-clickerBtn.Text = "Clicker: Kapalı"
-clickerBtn.TextColor3 = Color3.fromRGB(230,255,230)
-clickerBtn.Font = Enum.Font.GothamBold
-clickerBtn.TextSize = 13
-
--- Hız ayarı
-local speedBox = Instance.new("TextBox", panel)
-speedBox.Size = UDim2.new(0,60,0,24)
-speedBox.Position = UDim2.new(0,12,0,76)
-speedBox.BackgroundColor3 = Color3.fromRGB(60,70,90)
-speedBox.Text = "100"
-speedBox.TextColor3 = Color3.fromRGB(220,250,250)
-speedBox.Font = Enum.Font.Gotham
-speedBox.TextSize = 14
-speedBox.ClearTextOnFocus = false
-
-local speedLabel = Instance.new("TextLabel", panel)
-speedLabel.Text = "Hız (ms)"
-speedLabel.Size = UDim2.new(0,50,0,20)
-speedLabel.Position = UDim2.new(0,75,0,76)
-speedLabel.BackgroundTransparency = 1
-speedLabel.TextColor3 = Color3.fromRGB(190,230,255)
-speedLabel.Font = Enum.Font.Gotham
-speedLabel.TextSize = 13
-
--- Infinite Jump Butonu
-local jumpBtn = Instance.new("TextButton", panel)
-jumpBtn.Size = UDim2.new(0,170,0,26)
-jumpBtn.Position = UDim2.new(0,12,0,104)
-jumpBtn.BackgroundColor3 = Color3.fromRGB(80,70,180)
-jumpBtn.Text = "Infinite Jump: Kapalı"
-jumpBtn.TextColor3 = Color3.fromRGB(230,230,255)
-jumpBtn.Font = Enum.Font.GothamBold
-jumpBtn.TextSize = 14
-
--- Halka (Ring)
-local ring = Instance.new("ImageButton", gui)
-ring.Image = "rbxassetid://6031091006"
-ring.BackgroundTransparency = 1
-ring.Size = UDim2.new(0,60,0,60)
-ring.Position = UDim2.new(0.5, -30, 0.5, 80)
-ring.Active = true
-ring.Draggable = true
-ring.Visible = false
-
--- Vars
-local ringVisible = false
-local running = false
-local clickDelay = 0.10
-local infiniteJump = false
-
--- Ring Göster/Gizle
-ringBtn.MouseButton1Click:Connect(function()
-    ringVisible = not ringVisible
-    ring.Visible = ringVisible
+toggleBtn.MouseButton1Click:Connect(function()
+ panel.Visible=not panel.Visible
 end)
 
--- Clicker Başlat/Durdur
 clickerBtn.MouseButton1Click:Connect(function()
-    running = not running
-    clickerBtn.Text = running and "Clicker: Açık" or "Clicker: Kapalı"
+ running=not running
+ clickerBtn.Text=running and"Clicker: Açık"or"Clicker: Kapalı"
+ clickerBtn.BackgroundColor3=running and Color3.fromRGB(200,80,80)or Color3.fromRGB(40,180,100)
+ indicator.BackgroundColor3=running and Color3.fromRGB(80,200,80)or Color3.fromRGB(200,80,80)
+ if running then
+  local slot=tonumber(slotBox.Text)or 1
+  local keyMap={[1]="One",[2]="Two",[3]="Three",[4]="Four"}
+  local k=keyMap[slot]
+  if k then vim:SendKeyEvent(true,k,false,game)vim:SendKeyEvent(false,k,false,game)end
+ end
 end)
 
--- Sonsuz click döngüsü (Ring’in tam ortasına!)
-spawn(function()
-    while true do
-        if running and ringVisible then
-            local spd = tonumber(speedBox.Text) or 100
-            -- RING'İN EKRANDAN DÜNYAYA POZİSYONUNU AL:
-            local viewportPos = ring.AbsolutePosition + (ring.AbsoluteSize/2)
-            -- Mobilde "mouse1click" varsa, mouse'u ring'in üstüne çek ve tıkla:
-            if mousemoverel and mouse1click then
-                -- Sadece PC için: mouse'u ring'in ortasına taşır ve tıklar
-                local cx, cy = workspace.CurrentCamera.ViewportSize.X, workspace.CurrentCamera.ViewportSize.Y
-                local moveX = viewportPos.X - (cx/2)
-                local moveY = viewportPos.Y - (cy/2)
-                mousemoverel(moveX, moveY)
-                wait(0.02)
-                mouse1click()
-                wait(0.02)
-                mousemoverel(-(moveX), -(moveY))
-            elseif mouse1click then
-                mouse1click()
-            end
-            -- Eğer bunlar çalışmazsa: Halka'nın üstündeki tıklama eventini tetikle
-            ring:Activate()
-            wait(math.max(spd/1000,0.01))
-        else
-            wait(0.1)
-        end
-    end
-end)
-
--- Infinite Jump (Yere her değdiğinde bir kere zıplatır, uzaya uçurmaz!)
-local lastJump = tick()
-RunService.RenderStepped:Connect(function()
-    if infiniteJump then
-        local char = player.Character
-        if char and char:FindFirstChildOfClass("Humanoid") then
-            local humanoid = char:FindFirstChildOfClass("Humanoid")
-            if humanoid:GetState() == Enum.HumanoidStateType.Landed then
-                if tick() - lastJump > 0.08 then
-                    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                    lastJump = tick()
-                end
-            end
-        end
-    end
-end)
-
-jumpBtn.MouseButton1Click:Connect(function()
-    infiniteJump = not infiniteJump
-    jumpBtn.Text = infiniteJump and "Infinite Jump: Açık" or "Infinite Jump: Kapalı"
+task.spawn(function()
+ while true do
+  if running then
+   local x=workspace.CurrentCamera.ViewportSize.X/2
+   local y=workspace.CurrentCamera.ViewportSize.Y/2
+   if mouse1click then mouse1click() end
+   vim:SendMouseButtonEvent(x,y,0,true,game,1)
+   vim:SendMouseButtonEvent(x,y,0,false,game,1)
+   task.wait(math.max(currentSpeed/1000,0.01))
+  else task.wait(0.1)end
+ end
 end)
