@@ -3,19 +3,19 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Clipboard = game:GetService("Clipboard")
+local CoreGui = game:GetService("CoreGui")
 local p = Players.LocalPlayer
-local playerGui = p:WaitForChild("PlayerGui")
 
 -- GUI
 local gui = Instance.new("ScreenGui")
 gui.Name = "SPTSAuto"
 gui.ResetOnSpawn = false
-gui.Parent = playerGui
 gui.Enabled = true
+gui.Parent = CoreGui
 
 local panel = Instance.new("Frame", gui)
-panel.Size = UDim2.new(0, 210, 0, 130)
-panel.Position = UDim2.new(0.04, 0, 0.7, 0)
+panel.Size = UDim2.new(0, 220, 0, 260)
+panel.Position = UDim2.new(0.05, 0, 0.3, 0)
 panel.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
 panel.Active = true
 panel.Draggable = true
@@ -30,15 +30,15 @@ title.TextColor3 = Color3.fromRGB(190, 230, 255)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 
--- GUI Toggle Button
+-- Toggle Button
 local toggleBtn = Instance.new("TextButton")
-toggleBtn.Size = UDim2.new(0, 30, 0, 30)
+toggleBtn.Size = UDim2.new(0, 35, 0, 35)
 toggleBtn.Position = UDim2.new(0, 10, 0, 10)
 toggleBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
 toggleBtn.Text = "🎛️"
 toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 toggleBtn.Font = Enum.Font.GothamBold
-toggleBtn.TextSize = 18
+toggleBtn.TextSize = 20
 toggleBtn.Parent = gui
 toggleBtn.Active = true
 toggleBtn.Draggable = true
