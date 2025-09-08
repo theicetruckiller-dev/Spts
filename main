@@ -1,224 +1,202 @@
-local Players=game:GetService("Players")
-local RunService=game:GetService("RunService")
-local VirtualInputManager=game:GetService("VirtualInputManager")
-local p=Players.LocalPlayer
-local gui=Instance.new("ScreenGui",p:WaitForChild("PlayerGui"))
-gui.Name="SPTSAuto"
-gui.ResetOnSpawn=false
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local p = Players.LocalPlayer
 
--- Panel
-local panel=Instance.new("Frame",gui)
-panel.Size=UDim2.new(0,320,0,300)
-panel.Position=UDim2.new(0.05,0,0.5,0)
-panel.BackgroundColor3=Color3.fromRGB(25,25,25)
-panel.Active=true
-panel.Draggable=true
-Instance.new("UICorner",panel).CornerRadius=UDim.new(0,12)
+-- GUI
+local gui = Instance.new("ScreenGui", p:WaitForChild("PlayerGui"))
+gui.Name = "SPTSAuto"
+gui.ResetOnSpawn = false
+
+local panel = Instance.new("Frame", gui)
+panel.Size = UDim2.new(0, 320, 0, 300)
+panel.Position = UDim2.new(0.05, 0, 0.5, 0)
+panel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+panel.Active = true
+panel.Draggable = true
+Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 12)
 
 -- Toggle GUI
-local toggleBtn=Instance.new("TextButton",gui)
-toggleBtn.Size=UDim2.new(0,50,0,50)
-toggleBtn.Position=UDim2.new(0.01,0,0.5,0)
-toggleBtn.BackgroundColor3=Color3.fromRGB(40,40,40)
-toggleBtn.Text="👁️"
-toggleBtn.TextColor3=Color3.fromRGB(230,230,230)
-toggleBtn.Font=Enum.Font.GothamBold
-toggleBtn.TextSize=26
-toggleBtn.Active=true
-toggleBtn.Draggable=true
-Instance.new("UICorner",toggleBtn).CornerRadius=UDim.new(1,0)
+local toggleBtn = Instance.new("TextButton", gui)
+toggleBtn.Size = UDim2.new(0, 50, 0, 50)
+toggleBtn.Position = UDim2.new(0.01, 0, 0.5, 0)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+toggleBtn.Text = "👁️"
+toggleBtn.TextColor3 = Color3.fromRGB(230, 230, 230)
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextSize = 26
+toggleBtn.Active = true
+toggleBtn.Draggable = true
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(1, 0)
 
-local panelVisible=true
+local panelVisible = true
 toggleBtn.MouseButton1Click:Connect(function()
- panelVisible=not panelVisible
- panel.Visible=panelVisible
- toggleBtn.Text=panelVisible and "👁️" or "❌"
+	panelVisible = not panelVisible
+	panel.Visible = panelVisible
+	toggleBtn.Text = panelVisible and "👁️" or "❌"
 end)
 
 -- Başlık
-local title=Instance.new("TextLabel",panel)
-title.Text="⚡ SPTS Auto"
-title.Size=UDim2.new(1,0,0,28)
-title.Position=UDim2.new(0,0,0,2)
-title.BackgroundTransparency=1
-title.TextColor3=Color3.fromRGB(230,230,230)
-title.Font=Enum.Font.GothamBold
-title.TextSize=18
+local title = Instance.new("TextLabel", panel)
+title.Text = "⚡ SPTS Auto"
+title.Size = UDim2.new(1, 0, 0, 28)
+title.Position = UDim2.new(0, 0, 0, 2)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(230, 230, 230)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
 
 -- Clicker
-local clickerBtn=Instance.new("TextButton",panel)
-clickerBtn.Size=UDim2.new(0,120,0,32)
-clickerBtn.Position=UDim2.new(0,10,0,40)
-clickerBtn.BackgroundColor3=Color3.fromRGB(40,180,100)
-clickerBtn.Text="Clicker: Kapalı"
-clickerBtn.TextColor3=Color3.fromRGB(240,240,240)
-clickerBtn.Font=Enum.Font.GothamBold
-clickerBtn.TextSize=14
-Instance.new("UICorner",clickerBtn).CornerRadius=UDim.new(0,8)
+local clickerBtn = Instance.new("TextButton", panel)
+clickerBtn.Size = UDim2.new(0, 120, 0, 32)
+clickerBtn.Position = UDim2.new(0, 10, 0, 40)
+clickerBtn.BackgroundColor3 = Color3.fromRGB(40, 180, 100)
+clickerBtn.Text = "Clicker: Kapalı"
+clickerBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
+clickerBtn.Font = Enum.Font.GothamBold
+clickerBtn.TextSize = 14
+Instance.new("UICorner", clickerBtn).CornerRadius = UDim.new(0, 8)
 
 -- Hız
-local speedBox=Instance.new("TextBox",panel)
-speedBox.Size=UDim2.new(0,60,0,26)
-speedBox.Position=UDim2.new(0,10,0,90)
-speedBox.BackgroundColor3=Color3.fromRGB(40,40,40)
-speedBox.Text="100"
-speedBox.TextColor3=Color3.fromRGB(220,220,220)
-speedBox.Font=Enum.Font.Gotham
-speedBox.TextSize=14
-speedBox.ClearTextOnFocus=false
-Instance.new("UICorner",speedBox).CornerRadius=UDim.new(0,6)
-speedBox.Parent=panel
+local speedBox = Instance.new("TextBox", panel)
+speedBox.Size = UDim2.new(0, 60, 0, 26)
+speedBox.Position = UDim2.new(0, 10, 0, 90)
+speedBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+speedBox.Text = "100"
+speedBox.TextColor3 = Color3.fromRGB(220, 220, 220)
+speedBox.Font = Enum.Font.Gotham
+speedBox.TextSize = 14
+speedBox.ClearTextOnFocus = false
+Instance.new("UICorner", speedBox).CornerRadius = UDim.new(0, 6)
+speedBox.Parent = panel
 
 -- Infinite Jump
-local jumpBtn=Instance.new("TextButton",panel)
-jumpBtn.Size=UDim2.new(0,250,0,30)
-jumpBtn.Position=UDim2.new(0,10,0,150)
-jumpBtn.BackgroundColor3=Color3.fromRGB(80,70,180)
-jumpBtn.Text="Infinite Jump: Kapalı"
-jumpBtn.TextColor3=Color3.fromRGB(240,240,255)
-jumpBtn.Font=Enum.Font.GothamBold
-jumpBtn.TextSize=14
-jumpBtn.Parent=panel
-Instance.new("UICorner",jumpBtn).CornerRadius=UDim.new(0,8)
+local jumpBtn = Instance.new("TextButton", panel)
+jumpBtn.Size = UDim2.new(0, 250, 0, 30)
+jumpBtn.Position = UDim2.new(0, 10, 0, 150)
+jumpBtn.BackgroundColor3 = Color3.fromRGB(80, 70, 180)
+jumpBtn.Text = "Infinite Jump: Kapalı"
+jumpBtn.TextColor3 = Color3.fromRGB(240, 240, 255)
+jumpBtn.Font = Enum.Font.GothamBold
+jumpBtn.TextSize = 14
+jumpBtn.Parent = panel
+Instance.new("UICorner", jumpBtn).CornerRadius = UDim.new(0, 8)
 
--- Havuzlar
-local pools={
- Vector3.new(366,250,-446),
- Vector3.new(348,264,-499),
- Vector3.new(1639,260,2250),
- Vector3.new(-2303,977,1072),
- Vector3.new(-2051,714,-1893)
+-- Havuz koordinatları
+local pools = {
+	Vector3.new(366, 250, -446),
+	Vector3.new(348, 264, -499),
+	Vector3.new(1639, 260, 2250),
+	Vector3.new(-2303, 977, 1072),
+	Vector3.new(-2051, 714, -1893)
 }
-local selectedPool=1
-local poolBtns={}
-for i=1,5 do
- local b=Instance.new("TextButton",panel)
- b.Size=UDim2.new(0,50,0,26)
- b.Position=UDim2.new(0,10+60*(i-1),0,190)
- b.BackgroundColor3=Color3.fromRGB(70,70,70)
- b.TextColor3=Color3.fromRGB(230,230,230)
- b.Font=Enum.Font.GothamBold
- b.TextSize=14
- b.Text="Havuz "..i
- Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)
- b.MouseButton1Click:Connect(function() selectedPool=i end)
- table.insert(poolBtns,b)
+local selectedPool = 1
+local poolBtns = {}
+for i = 1, #pools do
+	local b = Instance.new("TextButton", panel)
+	b.Size = UDim2.new(0, 50, 0, 26)
+	b.Position = UDim2.new(0, 10 + 60 * (i - 1), 0, 190)
+	b.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+	b.TextColor3 = Color3.fromRGB(230, 230, 230)
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 14
+	b.Text = "Havuz " .. i
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+	b.MouseButton1Click:Connect(function() selectedPool = i end)
+	table.insert(poolBtns, b)
 end
 
-local autoPoolBtn=Instance.new("TextButton",panel)
-autoPoolBtn.Size=UDim2.new(0,150,0,28)
-autoPoolBtn.Position=UDim2.new(0,10,0,220)
-autoPoolBtn.BackgroundColor3=Color3.fromRGB(200,120,50)
-autoPoolBtn.Text="Auto Havuz: Kapalı"
-autoPoolBtn.TextColor3=Color3.fromRGB(240,240,240)
-autoPoolBtn.Font=Enum.Font.GothamBold
-autoPoolBtn.TextSize=14
-autoPoolBtn.Parent=panel
-Instance.new("UICorner",autoPoolBtn).CornerRadius=UDim.new(0,8)
+local autoPoolBtn = Instance.new("TextButton", panel)
+autoPoolBtn.Size = UDim2.new(0, 150, 0, 28)
+autoPoolBtn.Position = UDim2.new(0, 10, 0, 220)
+autoPoolBtn.BackgroundColor3 = Color3.fromRGB(200, 120, 50)
+autoPoolBtn.Text = "Auto Havuz: Kapalı"
+autoPoolBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
+autoPoolBtn.Font = Enum.Font.GothamBold
+autoPoolBtn.TextSize = 14
+autoPoolBtn.Parent = panel
+Instance.new("UICorner", autoPoolBtn).CornerRadius = UDim.new(0, 8)
 
 -- Vars
-local running=false
-local infiniteJump=false
-local autoPool=false
-local currentSpeed=100
-local hasTeleported=false
+local running = false
+local infiniteJump = false
+local autoPool = false
+local lastPos
+local hasTeleported = false
 
 clickerBtn.MouseButton1Click:Connect(function()
- running=not running
- clickerBtn.Text=running and "Clicker: Açık" or "Clicker: Kapalı"
- clickerBtn.BackgroundColor3=running and Color3.fromRGB(200,80,80) or Color3.fromRGB(40,180,100)
+	running = not running
+	clickerBtn.Text = running and "Clicker: Açık" or "Clicker: Kapalı"
+	clickerBtn.BackgroundColor3 = running and Color3.fromRGB(200, 80, 80) or Color3.fromRGB(40, 180, 100)
 end)
 
 jumpBtn.MouseButton1Click:Connect(function()
- infiniteJump=not infiniteJump
- jumpBtn.Text=infiniteJump and "Infinite Jump: Açık" or "Infinite Jump: Kapalı"
+	infiniteJump = not infiniteJump
+	jumpBtn.Text = infiniteJump and "Infinite Jump: Açık" or "Infinite Jump: Kapalı"
 end)
 
 autoPoolBtn.MouseButton1Click:Connect(function()
- autoPool=not autoPool
- autoPoolBtn.Text=autoPool and "Auto Havuz: Açık" or "Auto Havuz: Kapalı"
+	autoPool = not autoPool
+	autoPoolBtn.Text = autoPool and "Auto Havuz: Açık" or "Auto Havuz: Kapalı"
+	hasTeleported = false
 end)
 
--- Auto clicker loop
+-- Auto clicker
 task.spawn(function()
- while true do
-  if running then
-   local spd=tonumber(speedBox.Text) or currentSpeed
-   local x=workspace.CurrentCamera.ViewportSize.X/2
-   local y=workspace.CurrentCamera.ViewportSize.Y/2
-   VirtualInputManager:SendMouseButtonEvent(x,y,0,true,game,1)
-   VirtualInputManager:SendMouseButtonEvent(x,y,0,false,game,1)
-   task.wait(math.max(spd/1000,0.01))
-  else task.wait(0.1) end
- end
+	while true do
+		if running then
+			local spd = tonumber(speedBox.Text) or 100
+			local x = workspace.CurrentCamera.ViewportSize.X / 2
+			local y = workspace.CurrentCamera.ViewportSize.Y / 2
+			VirtualInputManager:SendMouseButtonEvent(x, y, 0, true, game, 1)
+			VirtualInputManager:SendMouseButtonEvent(x, y, 0, false, game, 1)
+			task.wait(math.max(spd / 1000, 0.01))
+		else
+			task.wait(0.1)
+		end
+	end
 end)
 
 -- Infinite Jump
-local lastJump=tick()
 RunService.RenderStepped:Connect(function()
- if infiniteJump then
-  local char=p.Character
-  if char and char:FindFirstChildOfClass("Humanoid") then
-   local hum=char:FindFirstChildOfClass("Humanoid")
-   if hum:GetState()==Enum.HumanoidStateType.Landed then
-    if tick()-lastJump>0.08 then
-     hum:ChangeState(Enum.HumanoidStateType.Jumping)
-     lastJump=tick()
-    end
-   end
-  end
- end
+	if infiniteJump then
+		local char = p.Character
+		if char and char:FindFirstChildOfClass("Humanoid") then
+			local hum = char:FindFirstChildOfClass("Humanoid")
+			if hum:GetState() == Enum.HumanoidStateType.Landed then
+				hum:ChangeState(Enum.HumanoidStateType.Jumping)
+			end
+		end
+	end
 end)
 
--- Auto Havuz / Spawn sonrası ışınlama
+-- Direkt ışınlama fonksiyonu
 local function doTeleport()
- local char=p.Character
- if char and char:FindFirstChild("HumanoidRootPart") and autoPool and not hasTeleported then
-  char.HumanoidRootPart.CFrame=CFrame.new(pools[selectedPool])
-  hasTeleported=true
- end
+	local char = p.Character
+	if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
+		char.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
+		hasTeleported = true
+	end
 end
 
--- Spawn butonu tıklama
-local function tryRespawn()
- local CoreMenu=game:GetService("CoreGui"):FindFirstChild("TopBarApp")
- if CoreMenu then
-  CoreMenu=CoreMenu:FindFirstChild("TopBarApp")
-  if CoreMenu then
-   CoreMenu=CoreMenu:FindFirstChild("GamepadMenu")
-   if CoreMenu then
-    CoreMenu=CoreMenu:FindFirstChild("Menu")
-    if CoreMenu then
-     local respawnBtn=CoreMenu:FindFirstChild("Respawn")
-     if respawnBtn then
-      respawnBtn:Activate()
-      task.wait(0.2)
-      hasTeleported=false
-     end
-    end
-   end
-  end
- end
-end
-
--- Karakter koordinat değiştiyse ışınlama sıfırla
-local lastPos
+-- Koordinat değişince tekrar ışınla
 RunService.RenderStepped:Connect(function()
- local char=p.Character
- if char and char:FindFirstChild("HumanoidRootPart") then
-  local pos=char.HumanoidRootPart.Position
-  if lastPos and (pos-lastPos).magnitude>1 then
-   hasTeleported=false
-  end
-  lastPos=pos
- end
+	local char = p.Character
+	if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
+		local pos = char.HumanoidRootPart.Position
+		if lastPos and (pos - lastPos).magnitude > 1 then
+			hasTeleported = false
+		end
+		lastPos = pos
+	end
 end)
 
--- Kontrol loop
+-- Auto havuz loop
 task.spawn(function()
- while true do
-  tryRespawn()
-  doTeleport()
-  task.wait(0.5)
- end
+	while true do
+		if autoPool and not hasTeleported then
+			doTeleport()
+		end
+		task.wait(0.5)
+	end
 end)
