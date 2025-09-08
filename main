@@ -4,10 +4,14 @@ local UserInputService = game:GetService("UserInputService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Clipboard = game:GetService("Clipboard")
 local p = Players.LocalPlayer
+local playerGui = p:WaitForChild("PlayerGui")
 
-local gui = Instance.new("ScreenGui", p:WaitForChild("PlayerGui"))
+-- GUI
+local gui = Instance.new("ScreenGui")
 gui.Name = "SPTSAuto"
 gui.ResetOnSpawn = false
+gui.Parent = playerGui
+gui.Enabled = true
 
 local panel = Instance.new("Frame", gui)
 panel.Size = UDim2.new(0, 320, 0, 350)
@@ -36,6 +40,7 @@ toggleBtn.MouseButton1Click:Connect(function()
 	toggleBtn.Text = panelVisible and "👁️" or "❌"
 end)
 
+-- Başlık
 local title = Instance.new("TextLabel", panel)
 title.Text = "⚡ SPTS Auto (by Zwac)"
 title.Size = UDim2.new(1, 0, 0, 28)
@@ -45,6 +50,7 @@ title.TextColor3 = Color3.fromRGB(230, 230, 230)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 
+-- Auto Clicker
 local clickerBtn = Instance.new("TextButton", panel)
 clickerBtn.Size = UDim2.new(0, 120, 0, 32)
 clickerBtn.Position = UDim2.new(0, 10, 0, 40)
@@ -66,6 +72,7 @@ speedBox.TextSize = 14
 speedBox.ClearTextOnFocus = false
 Instance.new("UICorner", speedBox).CornerRadius = UDim.new(0, 6)
 
+-- Infinite Jump
 local jumpBtn = Instance.new("TextButton", panel)
 jumpBtn.Size = UDim2.new(0, 250, 0, 30)
 jumpBtn.Position = UDim2.new(0, 10, 0, 150)
@@ -76,6 +83,7 @@ jumpBtn.Font = Enum.Font.GothamBold
 jumpBtn.TextSize = 14
 Instance.new("UICorner", jumpBtn).CornerRadius = UDim.new(0, 8)
 
+-- Havuzlar
 local pools = {
 	Vector3.new(366, 250, -446),
 	Vector3.new(348, 264, -499),
@@ -104,6 +112,7 @@ for i = 1, #pools do
 	table.insert(poolBtns, b)
 end
 
+-- Auto Pool
 local autoPoolBtn = Instance.new("TextButton", panel)
 autoPoolBtn.Size = UDim2.new(0, 150, 0, 28)
 autoPoolBtn.Position = UDim2.new(0, 10, 0, 220)
@@ -114,6 +123,7 @@ autoPoolBtn.Font = Enum.Font.GothamBold
 autoPoolBtn.TextSize = 14
 Instance.new("UICorner", autoPoolBtn).CornerRadius = UDim.new(0, 8)
 
+-- Discord
 local discordBtn = Instance.new("TextButton", panel)
 discordBtn.Size = UDim2.new(0, 150, 0, 28)
 discordBtn.Position = UDim2.new(0, 10, 0, 260)
@@ -128,6 +138,7 @@ discordBtn.MouseButton1Click:Connect(function()
 	Clipboard:SetClipboard(discordLink)
 end)
 
+-- Vars
 local running = false
 local infiniteJump = false
 local autoPool = false
@@ -135,6 +146,7 @@ local hasTeleported = false
 local clickRunning = false
 local clickPos
 
+-- Clicker
 local function initClicker()
 	if clickRunning then return end
 	local conn
@@ -148,27 +160,27 @@ local function initClicker()
 		end
 	end)
 end
-
 clickerBtn.MouseButton1Click:Connect(function()
-	if not clickRunning then
-		initClicker()
-	else
+	if not clickRunning then initClicker() else
 		clickRunning = not clickRunning
 		clickerBtn.Text = clickRunning and "Clicker: On" or "Clicker: Off"
 	end
 end)
 
+-- Infinite Jump
 jumpBtn.MouseButton1Click:Connect(function()
 	infiniteJump = not infiniteJump
 	jumpBtn.Text = infiniteJump and "Infinite Jump: On" or "Infinite Jump: Off"
 end)
 
+-- Auto Pool
 autoPoolBtn.MouseButton1Click:Connect(function()
 	autoPool = not autoPool
 	autoPoolBtn.Text = autoPool and "Auto Pool: On" or "Auto Pool: Off"
 	hasTeleported = false
 end)
 
+-- Click loop
 task.spawn(function()
 	while true do
 		if clickRunning and clickPos then
@@ -182,6 +194,7 @@ task.spawn(function()
 	end
 end)
 
+-- Infinite Jump loop
 RunService.RenderStepped:Connect(function()
 	if infiniteJump then
 		local char = p.Character
@@ -194,6 +207,7 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
+-- Auto Pool loop
 RunService.RenderStepped:Connect(function()
 	if autoPool and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
 		local hrp = p.Character.HumanoidRootPart
