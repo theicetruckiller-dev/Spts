@@ -2,24 +2,21 @@ local Players=game:GetService("Players")
 local RunService=game:GetService("RunService")
 local VirtualInputManager=game:GetService("VirtualInputManager")
 local p=Players.LocalPlayer
-
--- GUI
-local gui=Instance.new("ScreenGui")
+local gui=Instance.new("ScreenGui",p:WaitForChild("PlayerGui"))
 gui.Name="SPTSAuto"
 gui.ResetOnSpawn=false
-gui.Parent=p:WaitForChild("PlayerGui")
 
-local panel=Instance.new("Frame")
-panel.Size=UDim2.new(0,300,0,270)
-panel.Position=UDim2.new(0.05,0,0.55,0)
+-- Panel
+local panel=Instance.new("Frame",gui)
+panel.Size=UDim2.new(0,320,0,300)
+panel.Position=UDim2.new(0.05,0,0.5,0)
 panel.BackgroundColor3=Color3.fromRGB(25,25,25)
 panel.Active=true
 panel.Draggable=true
-panel.Parent=gui
 Instance.new("UICorner",panel).CornerRadius=UDim.new(0,12)
 
 -- Toggle GUI
-local toggleBtn=Instance.new("TextButton")
+local toggleBtn=Instance.new("TextButton",gui)
 toggleBtn.Size=UDim2.new(0,50,0,50)
 toggleBtn.Position=UDim2.new(0.01,0,0.5,0)
 toggleBtn.BackgroundColor3=Color3.fromRGB(40,40,40)
@@ -29,7 +26,6 @@ toggleBtn.Font=Enum.Font.GothamBold
 toggleBtn.TextSize=26
 toggleBtn.Active=true
 toggleBtn.Draggable=true
-toggleBtn.Parent=gui
 Instance.new("UICorner",toggleBtn).CornerRadius=UDim.new(1,0)
 
 local panelVisible=true
@@ -40,7 +36,7 @@ toggleBtn.MouseButton1Click:Connect(function()
 end)
 
 -- Başlık
-local title=Instance.new("TextLabel")
+local title=Instance.new("TextLabel",panel)
 title.Text="⚡ SPTS Auto"
 title.Size=UDim2.new(1,0,0,28)
 title.Position=UDim2.new(0,0,0,2)
@@ -48,10 +44,9 @@ title.BackgroundTransparency=1
 title.TextColor3=Color3.fromRGB(230,230,230)
 title.Font=Enum.Font.GothamBold
 title.TextSize=18
-title.Parent=panel
 
 -- Clicker
-local clickerBtn=Instance.new("TextButton")
+local clickerBtn=Instance.new("TextButton",panel)
 clickerBtn.Size=UDim2.new(0,120,0,32)
 clickerBtn.Position=UDim2.new(0,10,0,40)
 clickerBtn.BackgroundColor3=Color3.fromRGB(40,180,100)
@@ -59,11 +54,10 @@ clickerBtn.Text="Clicker: Kapalı"
 clickerBtn.TextColor3=Color3.fromRGB(240,240,240)
 clickerBtn.Font=Enum.Font.GothamBold
 clickerBtn.TextSize=14
-clickerBtn.Parent=panel
 Instance.new("UICorner",clickerBtn).CornerRadius=UDim.new(0,8)
 
 -- Hız
-local speedBox=Instance.new("TextBox")
+local speedBox=Instance.new("TextBox",panel)
 speedBox.Size=UDim2.new(0,60,0,26)
 speedBox.Position=UDim2.new(0,10,0,90)
 speedBox.BackgroundColor3=Color3.fromRGB(40,40,40)
@@ -72,11 +66,11 @@ speedBox.TextColor3=Color3.fromRGB(220,220,220)
 speedBox.Font=Enum.Font.Gotham
 speedBox.TextSize=14
 speedBox.ClearTextOnFocus=false
-speedBox.Parent=panel
 Instance.new("UICorner",speedBox).CornerRadius=UDim.new(0,6)
+speedBox.Parent=panel
 
 -- Infinite Jump
-local jumpBtn=Instance.new("TextButton")
+local jumpBtn=Instance.new("TextButton",panel)
 jumpBtn.Size=UDim2.new(0,250,0,30)
 jumpBtn.Position=UDim2.new(0,10,0,150)
 jumpBtn.BackgroundColor3=Color3.fromRGB(80,70,180)
@@ -87,7 +81,7 @@ jumpBtn.TextSize=14
 jumpBtn.Parent=panel
 Instance.new("UICorner",jumpBtn).CornerRadius=UDim.new(0,8)
 
--- Havuz
+-- Havuzlar
 local pools={
  Vector3.new(366,250,-446),
  Vector3.new(348,264,-499),
@@ -95,19 +89,23 @@ local pools={
  Vector3.new(-2303,977,1072),
  Vector3.new(-2051,714,-1893)
 }
-local poolBox=Instance.new("TextBox")
-poolBox.Size=UDim2.new(0,60,0,26)
-poolBox.Position=UDim2.new(0,130,0,188)
-poolBox.BackgroundColor3=Color3.fromRGB(40,40,40)
-poolBox.Text="1"
-poolBox.TextColor3=Color3.fromRGB(220,220,220)
-poolBox.Font=Enum.Font.Gotham
-poolBox.TextSize=14
-poolBox.ClearTextOnFocus=false
-poolBox.Parent=panel
-Instance.new("UICorner",poolBox).CornerRadius=UDim.new(0,6)
+local selectedPool=1
+local poolBtns={}
+for i=1,5 do
+ local b=Instance.new("TextButton",panel)
+ b.Size=UDim2.new(0,50,0,26)
+ b.Position=UDim2.new(0,10+60*(i-1),0,190)
+ b.BackgroundColor3=Color3.fromRGB(70,70,70)
+ b.TextColor3=Color3.fromRGB(230,230,230)
+ b.Font=Enum.Font.GothamBold
+ b.TextSize=14
+ b.Text="Havuz "..i
+ Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)
+ b.MouseButton1Click:Connect(function() selectedPool=i end)
+ table.insert(poolBtns,b)
+end
 
-local autoPoolBtn=Instance.new("TextButton")
+local autoPoolBtn=Instance.new("TextButton",panel)
 autoPoolBtn.Size=UDim2.new(0,150,0,28)
 autoPoolBtn.Position=UDim2.new(0,10,0,220)
 autoPoolBtn.BackgroundColor3=Color3.fromRGB(200,120,50)
@@ -123,6 +121,7 @@ local running=false
 local infiniteJump=false
 local autoPool=false
 local currentSpeed=100
+local hasTeleported=false
 
 clickerBtn.MouseButton1Click:Connect(function()
  running=not running
@@ -172,32 +171,54 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- Auto Havuz / Spawn sonrası ışınlama
-local function startAutoPool(char)
- task.spawn(function()
-  while autoPool and char and char:FindFirstChild("HumanoidRootPart") do
-   local poolNum=math.clamp(tonumber(poolBox.Text) or 1,1,#pools)
-   char.HumanoidRootPart.CFrame=CFrame.new(pools[poolNum])
-   task.wait(1)
-  end
- end)
+local function doTeleport()
+ local char=p.Character
+ if char and char:FindFirstChild("HumanoidRootPart") and autoPool and not hasTeleported then
+  char.HumanoidRootPart.CFrame=CFrame.new(pools[selectedPool])
+  hasTeleported=true
+ end
 end
 
--- Spawn ekranı geldiğinde otomatik Respawn
-local function autoRespawn()
-    local CoreMenu=CoreGui:WaitForChild("TopBarApp"):WaitForChild("TopBarApp"):WaitForChild("GamepadMenu"):WaitForChild("Menu")
-    local respawnBtn=CoreMenu:FindFirstChild("Respawn")
-    if respawnBtn then
-        respawnBtn:Activate()
+-- Spawn butonu tıklama
+local function tryRespawn()
+ local CoreMenu=game:GetService("CoreGui"):FindFirstChild("TopBarApp")
+ if CoreMenu then
+  CoreMenu=CoreMenu:FindFirstChild("TopBarApp")
+  if CoreMenu then
+   CoreMenu=CoreMenu:FindFirstChild("GamepadMenu")
+   if CoreMenu then
+    CoreMenu=CoreMenu:FindFirstChild("Menu")
+    if CoreMenu then
+     local respawnBtn=CoreMenu:FindFirstChild("Respawn")
+     if respawnBtn then
+      respawnBtn:Activate()
+      task.wait(0.2)
+      hasTeleported=false
+     end
     end
+   end
+  end
+ end
 end
 
--- Karakter spawn sonrası ışınlama + spawn ekranı
-p.CharacterAdded:Connect(function(char)
-    char:WaitForChild("HumanoidRootPart")
-    autoRespawn()
-    if autoPool then startAutoPool(char) end
+-- Karakter koordinat değiştiyse ışınlama sıfırla
+local lastPos
+RunService.RenderStepped:Connect(function()
+ local char=p.Character
+ if char and char:FindFirstChild("HumanoidRootPart") then
+  local pos=char.HumanoidRootPart.Position
+  if lastPos and (pos-lastPos).magnitude>1 then
+   hasTeleported=false
+  end
+  lastPos=pos
+ end
 end)
 
-if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-    startAutoPool(p.Character)
-end
+-- Kontrol loop
+task.spawn(function()
+ while true do
+  tryRespawn()
+  doTeleport()
+  task.wait(0.5)
+ end
+end)
