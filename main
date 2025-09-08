@@ -1,23 +1,25 @@
-local p=game:GetService("Players").LocalPlayer
-local vim=game:GetService("VirtualInputManager")
+local Players=game:GetService("Players")
 local RunService=game:GetService("RunService")
-local CoreGui=game:GetService("CoreGui")
+local VirtualInputManager=game:GetService("VirtualInputManager")
+local p=Players.LocalPlayer
 
 -- GUI
-local gui=Instance.new("ScreenGui",p:WaitForChild("PlayerGui"))
-gui.Name="SPTSAutoClicker"
+local gui=Instance.new("ScreenGui")
+gui.Name="SPTSAuto"
 gui.ResetOnSpawn=false
+gui.Parent=p:WaitForChild("PlayerGui")
 
-local panel=Instance.new("Frame",gui)
-panel.BackgroundColor3=Color3.fromRGB(25,25,25)
+local panel=Instance.new("Frame")
 panel.Size=UDim2.new(0,300,0,270)
 panel.Position=UDim2.new(0.05,0,0.55,0)
+panel.BackgroundColor3=Color3.fromRGB(25,25,25)
 panel.Active=true
 panel.Draggable=true
+panel.Parent=gui
 Instance.new("UICorner",panel).CornerRadius=UDim.new(0,12)
 
--- Toggle butonu
-local toggleBtn=Instance.new("TextButton",gui)
+-- Toggle GUI
+local toggleBtn=Instance.new("TextButton")
 toggleBtn.Size=UDim2.new(0,50,0,50)
 toggleBtn.Position=UDim2.new(0.01,0,0.5,0)
 toggleBtn.BackgroundColor3=Color3.fromRGB(40,40,40)
@@ -27,6 +29,7 @@ toggleBtn.Font=Enum.Font.GothamBold
 toggleBtn.TextSize=26
 toggleBtn.Active=true
 toggleBtn.Draggable=true
+toggleBtn.Parent=gui
 Instance.new("UICorner",toggleBtn).CornerRadius=UDim.new(1,0)
 
 local panelVisible=true
@@ -37,16 +40,18 @@ toggleBtn.MouseButton1Click:Connect(function()
 end)
 
 -- Başlık
-local title=Instance.new("TextLabel",panel)
+local title=Instance.new("TextLabel")
 title.Text="⚡ SPTS Auto"
 title.Size=UDim2.new(1,0,0,28)
+title.Position=UDim2.new(0,0,0,2)
 title.BackgroundTransparency=1
 title.TextColor3=Color3.fromRGB(230,230,230)
 title.Font=Enum.Font.GothamBold
 title.TextSize=18
+title.Parent=panel
 
--- Clicker Butonu
-local clickerBtn=Instance.new("TextButton",panel)
+-- Clicker
+local clickerBtn=Instance.new("TextButton")
 clickerBtn.Size=UDim2.new(0,120,0,32)
 clickerBtn.Position=UDim2.new(0,10,0,40)
 clickerBtn.BackgroundColor3=Color3.fromRGB(40,180,100)
@@ -54,32 +59,11 @@ clickerBtn.Text="Clicker: Kapalı"
 clickerBtn.TextColor3=Color3.fromRGB(240,240,240)
 clickerBtn.Font=Enum.Font.GothamBold
 clickerBtn.TextSize=14
+clickerBtn.Parent=panel
 Instance.new("UICorner",clickerBtn).CornerRadius=UDim.new(0,8)
 
--- Slot kutusu
-local slotBox=Instance.new("TextBox",panel)
-slotBox.Size=UDim2.new(0,60,0,26)
-slotBox.Position=UDim2.new(0,150,0,42)
-slotBox.BackgroundColor3=Color3.fromRGB(40,40,40)
-slotBox.Text="1"
-slotBox.TextColor3=Color3.fromRGB(220,220,220)
-slotBox.Font=Enum.Font.Gotham
-slotBox.TextSize=14
-slotBox.ClearTextOnFocus=false
-Instance.new("UICorner",slotBox).CornerRadius=UDim.new(0,6)
-
--- Slot Label
-local slotLabel=Instance.new("TextLabel",panel)
-slotLabel.Text="Slot (1-4)"
-slotLabel.Size=UDim2.new(0,80,0,20)
-slotLabel.Position=UDim2.new(0,150,0,70)
-slotLabel.BackgroundTransparency=1
-slotLabel.TextColor3=Color3.fromRGB(200,200,200)
-slotLabel.Font=Enum.Font.Gotham
-slotLabel.TextSize=13
-
--- Hız textbox
-local speedBox=Instance.new("TextBox",panel)
+-- Hız
+local speedBox=Instance.new("TextBox")
 speedBox.Size=UDim2.new(0,60,0,26)
 speedBox.Position=UDim2.new(0,10,0,90)
 speedBox.BackgroundColor3=Color3.fromRGB(40,40,40)
@@ -88,28 +72,11 @@ speedBox.TextColor3=Color3.fromRGB(220,220,220)
 speedBox.Font=Enum.Font.Gotham
 speedBox.TextSize=14
 speedBox.ClearTextOnFocus=false
+speedBox.Parent=panel
 Instance.new("UICorner",speedBox).CornerRadius=UDim.new(0,6)
 
--- Hız butonları
-local speeds={["Hızlı"]=50,["Orta"]=100,["Yavaş"]=300}
-local xPos=100
-local currentSpeed=100
-for n,s in pairs(speeds)do
- local b=Instance.new("TextButton",panel)
- b.Size=UDim2.new(0,60,0,26)
- b.Position=UDim2.new(0,xPos,0,90)
- b.BackgroundColor3=Color3.fromRGB(70,70,70)
- b.TextColor3=Color3.fromRGB(230,230,230)
- b.Font=Enum.Font.GothamBold
- b.TextSize=13
- b.Text=n
- Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)
- b.MouseButton1Click:Connect(function() currentSpeed=s speedBox.Text=tostring(s) end)
- xPos=xPos+70
-end
-
 -- Infinite Jump
-local jumpBtn=Instance.new("TextButton",panel)
+local jumpBtn=Instance.new("TextButton")
 jumpBtn.Size=UDim2.new(0,250,0,30)
 jumpBtn.Position=UDim2.new(0,10,0,150)
 jumpBtn.BackgroundColor3=Color3.fromRGB(80,70,180)
@@ -117,9 +84,10 @@ jumpBtn.Text="Infinite Jump: Kapalı"
 jumpBtn.TextColor3=Color3.fromRGB(240,240,255)
 jumpBtn.Font=Enum.Font.GothamBold
 jumpBtn.TextSize=14
+jumpBtn.Parent=panel
 Instance.new("UICorner",jumpBtn).CornerRadius=UDim.new(0,8)
 
--- Havuz GUI
+-- Havuz
 local pools={
  Vector3.new(366,250,-446),
  Vector3.new(348,264,-499),
@@ -127,16 +95,7 @@ local pools={
  Vector3.new(-2303,977,1072),
  Vector3.new(-2051,714,-1893)
 }
-local poolLabel=Instance.new("TextLabel",panel)
-poolLabel.Text="Havuz Seç (1-5)"
-poolLabel.Size=UDim2.new(0,120,0,20)
-poolLabel.Position=UDim2.new(0,10,0,190)
-poolLabel.BackgroundTransparency=1
-poolLabel.TextColor3=Color3.fromRGB(200,200,200)
-poolLabel.Font=Enum.Font.Gotham
-poolLabel.TextSize=13
-
-local poolBox=Instance.new("TextBox",panel)
+local poolBox=Instance.new("TextBox")
 poolBox.Size=UDim2.new(0,60,0,26)
 poolBox.Position=UDim2.new(0,130,0,188)
 poolBox.BackgroundColor3=Color3.fromRGB(40,40,40)
@@ -145,9 +104,10 @@ poolBox.TextColor3=Color3.fromRGB(220,220,220)
 poolBox.Font=Enum.Font.Gotham
 poolBox.TextSize=14
 poolBox.ClearTextOnFocus=false
+poolBox.Parent=panel
 Instance.new("UICorner",poolBox).CornerRadius=UDim.new(0,6)
 
-local autoPoolBtn=Instance.new("TextButton",panel)
+local autoPoolBtn=Instance.new("TextButton")
 autoPoolBtn.Size=UDim2.new(0,150,0,28)
 autoPoolBtn.Position=UDim2.new(0,10,0,220)
 autoPoolBtn.BackgroundColor3=Color3.fromRGB(200,120,50)
@@ -155,12 +115,14 @@ autoPoolBtn.Text="Auto Havuz: Kapalı"
 autoPoolBtn.TextColor3=Color3.fromRGB(240,240,240)
 autoPoolBtn.Font=Enum.Font.GothamBold
 autoPoolBtn.TextSize=14
+autoPoolBtn.Parent=panel
 Instance.new("UICorner",autoPoolBtn).CornerRadius=UDim.new(0,8)
 
 -- Vars
 local running=false
 local infiniteJump=false
 local autoPool=false
+local currentSpeed=100
 
 clickerBtn.MouseButton1Click:Connect(function()
  running=not running
@@ -178,21 +140,21 @@ autoPoolBtn.MouseButton1Click:Connect(function()
  autoPoolBtn.Text=autoPool and "Auto Havuz: Açık" or "Auto Havuz: Kapalı"
 end)
 
--- Auto click loop
+-- Auto clicker loop
 task.spawn(function()
  while true do
   if running then
-   local spd=tonumber(speedBox.Text)or currentSpeed
+   local spd=tonumber(speedBox.Text) or currentSpeed
    local x=workspace.CurrentCamera.ViewportSize.X/2
    local y=workspace.CurrentCamera.ViewportSize.Y/2
-   vim:SendMouseButtonEvent(x,y,0,true,game,1)
-   vim:SendMouseButtonEvent(x,y,0,false,game,1)
+   VirtualInputManager:SendMouseButtonEvent(x,y,0,true,game,1)
+   VirtualInputManager:SendMouseButtonEvent(x,y,0,false,game,1)
    task.wait(math.max(spd/1000,0.01))
-  else task.wait(0.1)end
+  else task.wait(0.1) end
  end
 end)
 
--- Infinite jump
+-- Infinite Jump
 local lastJump=tick()
 RunService.RenderStepped:Connect(function()
  if infiniteJump then
@@ -211,4 +173,31 @@ end)
 
 -- Auto Havuz / Spawn sonrası ışınlama
 local function startAutoPool(char)
-    task
+ task.spawn(function()
+  while autoPool and char and char:FindFirstChild("HumanoidRootPart") do
+   local poolNum=math.clamp(tonumber(poolBox.Text) or 1,1,#pools)
+   char.HumanoidRootPart.CFrame=CFrame.new(pools[poolNum])
+   task.wait(1)
+  end
+ end)
+end
+
+-- Spawn ekranı geldiğinde otomatik Respawn
+local function autoRespawn()
+    local CoreMenu=CoreGui:WaitForChild("TopBarApp"):WaitForChild("TopBarApp"):WaitForChild("GamepadMenu"):WaitForChild("Menu")
+    local respawnBtn=CoreMenu:FindFirstChild("Respawn")
+    if respawnBtn then
+        respawnBtn:Activate()
+    end
+end
+
+-- Karakter spawn sonrası ışınlama + spawn ekranı
+p.CharacterAdded:Connect(function(char)
+    char:WaitForChild("HumanoidRootPart")
+    autoRespawn()
+    if autoPool then startAutoPool(char) end
+end)
+
+if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+    startAutoPool(p.Character)
+end
