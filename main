@@ -1,110 +1,240 @@
 local p=game:GetService("Players").LocalPlayer
 local vim=game:GetService("VirtualInputManager")
+local RunService=game:GetService("RunService")
+
 local gui=Instance.new("ScreenGui",p:WaitForChild("PlayerGui"))
 gui.Name="SPTSAutoClicker"
 gui.ResetOnSpawn=false
+
+-- Ana Panel
 local panel=Instance.new("Frame",gui)
-panel.BackgroundColor3=Color3.fromRGB(40,40,60)
-panel.BackgroundTransparency=0.4
-panel.Size=UDim2.new(0,250,0,180)
-panel.Position=UDim2.new(0.04,0,0.6,0)
+panel.BackgroundColor3=Color3.fromRGB(25,25,25)
+panel.Size=UDim2.new(0,300,0,270)
+panel.Position=UDim2.new(0.05,0,0.55,0)
 panel.Active=true
 panel.Draggable=true
+Instance.new("UICorner",panel).CornerRadius=UDim.new(0,12)
+
+-- Toggle Butonu (göz ikonu)
+local toggleBtn=Instance.new("TextButton",gui)
+toggleBtn.Size=UDim2.new(0,50,0,50)
+toggleBtn.Position=UDim2.new(0.01,0,0.5,0)
+toggleBtn.BackgroundColor3=Color3.fromRGB(40,40,40)
+toggleBtn.Text="👁️"
+toggleBtn.TextColor3=Color3.fromRGB(230,230,230)
+toggleBtn.Font=Enum.Font.GothamBold
+toggleBtn.TextSize=26
+toggleBtn.Active=true
+toggleBtn.Draggable=true
+Instance.new("UICorner",toggleBtn).CornerRadius=UDim.new(1,0)
+
+local panelVisible=true
+toggleBtn.MouseButton1Click:Connect(function()
+ panelVisible=not panelVisible
+ panel.Visible=panelVisible
+ toggleBtn.Text=panelVisible and "👁️" or "❌"
+end)
+
+-- Başlık
 local title=Instance.new("TextLabel",panel)
-title.Text="⚡ SPTS Auto Clicker"
+title.Text="⚡ SPTS Auto"
 title.Size=UDim2.new(1,0,0,28)
 title.BackgroundTransparency=1
-title.TextColor3=Color3.fromRGB(190,230,255)
+title.TextColor3=Color3.fromRGB(230,230,230)
 title.Font=Enum.Font.GothamBold
 title.TextSize=18
+
+-- Clicker Butonu
 local clickerBtn=Instance.new("TextButton",panel)
-clickerBtn.Size=UDim2.new(0,100,0,28)
-clickerBtn.Position=UDim2.new(0,10,0,36)
+clickerBtn.Size=UDim2.new(0,120,0,32)
+clickerBtn.Position=UDim2.new(0,10,0,40)
 clickerBtn.BackgroundColor3=Color3.fromRGB(40,180,100)
 clickerBtn.Text="Clicker: Kapalı"
-clickerBtn.TextColor3=Color3.fromRGB(230,255,230)
+clickerBtn.TextColor3=Color3.fromRGB(240,240,240)
 clickerBtn.Font=Enum.Font.GothamBold
-clickerBtn.TextSize=13
+clickerBtn.TextSize=14
+Instance.new("UICorner",clickerBtn).CornerRadius=UDim.new(0,8)
+
+-- Slot kutusu
 local slotBox=Instance.new("TextBox",panel)
-slotBox.Size=UDim2.new(0,60,0,24)
-slotBox.Position=UDim2.new(0,10,0,70)
-slotBox.BackgroundColor3=Color3.fromRGB(60,70,90)
+slotBox.Size=UDim2.new(0,60,0,26)
+slotBox.Position=UDim2.new(0,150,0,42)
+slotBox.BackgroundColor3=Color3.fromRGB(40,40,40)
 slotBox.Text="1"
-slotBox.TextColor3=Color3.fromRGB(220,250,250)
+slotBox.TextColor3=Color3.fromRGB(220,220,220)
 slotBox.Font=Enum.Font.Gotham
 slotBox.TextSize=14
 slotBox.ClearTextOnFocus=false
+Instance.new("UICorner",slotBox).CornerRadius=UDim.new(0,6)
+
 local slotLabel=Instance.new("TextLabel",panel)
 slotLabel.Text="Slot (1-4)"
 slotLabel.Size=UDim2.new(0,80,0,20)
-slotLabel.Position=UDim2.new(0,12,0,94)
+slotLabel.Position=UDim2.new(0,150,0,70)
 slotLabel.BackgroundTransparency=1
-slotLabel.TextColor3=Color3.fromRGB(190,230,255)
+slotLabel.TextColor3=Color3.fromRGB(200,200,200)
 slotLabel.Font=Enum.Font.Gotham
 slotLabel.TextSize=13
+
+-- Hız textbox
+local speedBox=Instance.new("TextBox",panel)
+speedBox.Size=UDim2.new(0,60,0,26)
+speedBox.Position=UDim2.new(0,10,0,90)
+speedBox.BackgroundColor3=Color3.fromRGB(40,40,40)
+speedBox.Text="100"
+speedBox.TextColor3=Color3.fromRGB(220,220,220)
+speedBox.Font=Enum.Font.Gotham
+speedBox.TextSize=14
+speedBox.ClearTextOnFocus=false
+Instance.new("UICorner",speedBox).CornerRadius=UDim.new(0,6)
+
+local speedLabel=Instance.new("TextLabel",panel)
+speedLabel.Text="Hız (ms)"
+speedLabel.Size=UDim2.new(0,80,0,20)
+speedLabel.Position=UDim2.new(0,10,0,118)
+speedLabel.BackgroundTransparency=1
+speedLabel.TextColor3=Color3.fromRGB(200,200,200)
+speedLabel.Font=Enum.Font.Gotham
+speedLabel.TextSize=13
+
+-- Hazır hız butonları
 local speeds={["Hızlı"]=50,["Orta"]=100,["Yavaş"]=300}
-local yPos=130
+local xPos=100
 local currentSpeed=100
 for n,s in pairs(speeds)do
  local b=Instance.new("TextButton",panel)
- b.Size=UDim2.new(0,60,0,28)
- b.Position=UDim2.new(0,10,0,yPos)
- b.BackgroundColor3=Color3.fromRGB(70,70,150)
- b.TextColor3=Color3.fromRGB(230,230,255)
+ b.Size=UDim2.new(0,60,0,26)
+ b.Position=UDim2.new(0,xPos,0,90)
+ b.BackgroundColor3=Color3.fromRGB(70,70,70)
+ b.TextColor3=Color3.fromRGB(230,230,230)
  b.Font=Enum.Font.GothamBold
- b.TextSize=14
+ b.TextSize=13
  b.Text=n
- b.MouseButton1Click:Connect(function() currentSpeed=s end)
- yPos=yPos+32
+ Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)
+ b.MouseButton1Click:Connect(function() currentSpeed=s speedBox.Text=tostring(s) end)
+ xPos=xPos+70
 end
-local indicator=Instance.new("Frame",gui)
-indicator.Size=UDim2.new(0,30,0,30)
-indicator.Position=UDim2.new(0.5,-15,0.5,-15)
-indicator.BackgroundColor3=Color3.fromRGB(200,80,80)
-indicator.BackgroundTransparency=0.5
-indicator.BorderSizePixel=0
-local UICorner=Instance.new("UICorner",indicator)
-UICorner.CornerRadius=UDim.new(1,0)
+
+-- Infinite Jump Butonu
+local jumpBtn=Instance.new("TextButton",panel)
+jumpBtn.Size=UDim2.new(0,250,0,30)
+jumpBtn.Position=UDim2.new(0,10,0,150)
+jumpBtn.BackgroundColor3=Color3.fromRGB(80,70,180)
+jumpBtn.Text="Infinite Jump: Kapalı"
+jumpBtn.TextColor3=Color3.fromRGB(240,240,255)
+jumpBtn.Font=Enum.Font.GothamBold
+jumpBtn.TextSize=14
+Instance.new("UICorner",jumpBtn).CornerRadius=UDim.new(0,8)
+
+-- Auto Havuz Seçimi
+local pools = {
+ Vector3.new(366, 250, -446),
+ Vector3.new(348, 264, -499),
+ Vector3.new(1639, 260, 2250),
+ Vector3.new(-2303, 977, 1072),
+ Vector3.new(-2051, 714, -1893)
+}
+
+local poolLabel=Instance.new("TextLabel",panel)
+poolLabel.Text="Havuz Seç (1-5)"
+poolLabel.Size=UDim2.new(0,120,0,20)
+poolLabel.Position=UDim2.new(0,10,0,190)
+poolLabel.BackgroundTransparency=1
+poolLabel.TextColor3=Color3.fromRGB(200,200,200)
+poolLabel.Font=Enum.Font.Gotham
+poolLabel.TextSize=13
+
+local poolBox=Instance.new("TextBox",panel)
+poolBox.Size=UDim2.new(0,60,0,26)
+poolBox.Position=UDim2.new(0,130,0,188)
+poolBox.BackgroundColor3=Color3.fromRGB(40,40,40)
+poolBox.Text="1"
+poolBox.TextColor3=Color3.fromRGB(220,220,220)
+poolBox.Font=Enum.Font.Gotham
+poolBox.TextSize=14
+poolBox.ClearTextOnFocus=false
+Instance.new("UICorner",poolBox).CornerRadius=UDim.new(0,6)
+
+local autoPoolBtn=Instance.new("TextButton",panel)
+autoPoolBtn.Size=UDim2.new(0,150,0,28)
+autoPoolBtn.Position=UDim2.new(0,10,0,220)
+autoPoolBtn.BackgroundColor3=Color3.fromRGB(200,120,50)
+autoPoolBtn.Text="Auto Havuz: Kapalı"
+autoPoolBtn.TextColor3=Color3.fromRGB(240,240,240)
+autoPoolBtn.Font=Enum.Font.GothamBold
+autoPoolBtn.TextSize=14
+Instance.new("UICorner",autoPoolBtn).CornerRadius=UDim.new(0,8)
+
+-- Vars
 local running=false
-
--- Küçük toggle buton
-local toggleBtn=Instance.new("TextButton",gui)
-toggleBtn.Size=UDim2.new(0,30,0,30)
-toggleBtn.Position=UDim2.new(0.95,-30,0.05,0)
-toggleBtn.Text="☰"
-toggleBtn.BackgroundColor3=Color3.fromRGB(70,70,70)
-toggleBtn.TextColor3=Color3.fromRGB(230,230,255)
-toggleBtn.Font=Enum.Font.GothamBold
-toggleBtn.TextSize=18
-toggleBtn.Active=true
-toggleBtn.Draggable=true
-
-toggleBtn.MouseButton1Click:Connect(function()
- panel.Visible=not panel.Visible
-end)
+local infiniteJump=false
+local autoPool=false
 
 clickerBtn.MouseButton1Click:Connect(function()
  running=not running
- clickerBtn.Text=running and"Clicker: Açık"or"Clicker: Kapalı"
- clickerBtn.BackgroundColor3=running and Color3.fromRGB(200,80,80)or Color3.fromRGB(40,180,100)
- indicator.BackgroundColor3=running and Color3.fromRGB(80,200,80)or Color3.fromRGB(200,80,80)
+ clickerBtn.Text=running and "Clicker: Açık" or "Clicker: Kapalı"
+ clickerBtn.BackgroundColor3=running and Color3.fromRGB(200,80,80) or Color3.fromRGB(40,180,100)
  if running then
   local slot=tonumber(slotBox.Text)or 1
-  local keyMap={[1]="One",[2]="Two",[3]="Three",[4]="Four"}
-  local k=keyMap[slot]
+  local keys={[1]="One",[2]="Two",[3]="Three",[4]="Four"}
+  local k=keys[slot]
   if k then vim:SendKeyEvent(true,k,false,game)vim:SendKeyEvent(false,k,false,game)end
  end
 end)
 
+jumpBtn.MouseButton1Click:Connect(function()
+ infiniteJump=not infiniteJump
+ jumpBtn.Text=infiniteJump and "Infinite Jump: Açık" or "Infinite Jump: Kapalı"
+end)
+
+autoPoolBtn.MouseButton1Click:Connect(function()
+ autoPool=not autoPool
+ autoPoolBtn.Text=autoPool and "Auto Havuz: Açık" or "Auto Havuz: Kapalı"
+end)
+
+-- Auto click loop
 task.spawn(function()
  while true do
   if running then
+   local spd=tonumber(speedBox.Text)or currentSpeed
    local x=workspace.CurrentCamera.ViewportSize.X/2
    local y=workspace.CurrentCamera.ViewportSize.Y/2
    if mouse1click then mouse1click() end
    vim:SendMouseButtonEvent(x,y,0,true,game,1)
    vim:SendMouseButtonEvent(x,y,0,false,game,1)
-   task.wait(math.max(currentSpeed/1000,0.01))
+   task.wait(math.max(spd/1000,0.01))
   else task.wait(0.1)end
+ end
+end)
+
+-- Infinite jump sistemi
+local lastJump=tick()
+RunService.RenderStepped:Connect(function()
+ if infiniteJump then
+  local char=p.Character
+  if char and char:FindFirstChildOfClass("Humanoid") then
+   local hum=char:FindFirstChildOfClass("Humanoid")
+   if hum:GetState()==Enum.HumanoidStateType.Landed then
+    if tick()-lastJump>0.08 then
+     hum:ChangeState(Enum.HumanoidStateType.Jumping)
+     lastJump=tick()
+    end
+   end
+  end
+ end
+end)
+
+-- Auto Havuz sistemi
+task.spawn(function()
+ while true do
+  if autoPool then
+   local poolNum=tonumber(poolBox.Text) or 1
+   poolNum=math.clamp(poolNum,1,#pools)
+   local target=pools[poolNum]
+   if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+    p.Character.HumanoidRootPart.CFrame=CFrame.new(target)
+   end
+  end
+  task.wait(1)
  end
 end)
