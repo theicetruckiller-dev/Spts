@@ -1,292 +1,205 @@
-local Players=game:GetService("Players")
-local RunService=game:GetService("RunService")
-local UserInputService=game:GetService("UserInputService")
-local VirtualInputManager=game:GetService("VirtualInputManager")
-local p=Players.LocalPlayer
+--// Services
+local Players = game:GetService("Players")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local UserInputService = game:GetService("UserInputService")
+local camera = workspace.CurrentCamera
+local player = Players.LocalPlayer
 
--- GUI ROOT (PlayerGui, senin örneğin gibi)
-local gui=Instance.new("ScreenGui")
-gui.Name="SPTSAuto"
-gui.ResetOnSpawn=false
-gui.Parent=p:WaitForChild("PlayerGui")
+--// GUI
+local ScreenGui = Instance.new("ScreenGui", player.PlayerGui)
+ScreenGui.ResetOnSpawn = false
 
--- PANEL
-local panel=Instance.new("Frame",gui)
-panel.Size=UDim2.new(0,320,0,300)
-panel.Position=UDim2.new(0.05,0,0.5,0)
-panel.BackgroundColor3=Color3.fromRGB(25,25,25)
-panel.Active=true panel.Draggable=true
-Instance.new("UICorner",panel).CornerRadius=UDim.new(0,12)
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 260, 0, 420)
+Frame.Position = UDim2.new(0, 20, 0, 100)
+Frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Frame.Active = true
+Frame.Draggable = true
 
--- TOGGLE (göz)
-local toggleBtn=Instance.new("TextButton",gui)
-toggleBtn.Size=UDim2.new(0,50,0,50)
-toggleBtn.Position=UDim2.new(0.01,0,0.5,0)
-toggleBtn.BackgroundColor3=Color3.fromRGB(40,40,40)
-toggleBtn.Text="👁️" toggleBtn.TextColor3=Color3.fromRGB(230,230,230)
-toggleBtn.Font=Enum.Font.GothamBold toggleBtn.TextSize=26
-toggleBtn.Active=true toggleBtn.Draggable=true
-Instance.new("UICorner",toggleBtn).CornerRadius=UDim.new(1,0)
-local panelVisible=true
-toggleBtn.MouseButton1Click:Connect(function()
-	panelVisible=not panelVisible
-	panel.Visible=panelVisible
-	toggleBtn.Text=panelVisible and "👁️" or "❌"
-end)
+local UIListLayout = Instance.new("UIListLayout", Frame)
+UIListLayout.Padding = UDim.new(0,5)
 
--- TITLE
-local title=Instance.new("TextLabel",panel)
-title.Text="⚡ SPTS Auto (by Zwac)"
-title.Size=UDim2.new(1,0,0,28)
-title.Position=UDim2.new(0,0,0,2)
-title.BackgroundTransparency=1
-title.TextColor3=Color3.fromRGB(230,230,230)
-title.Font=Enum.Font.GothamBold title.TextSize=18
+--// Buttons
+local clickerBtn = Instance.new("TextButton", Frame)
+clickerBtn.Size = UDim2.new(1, -10, 0, 40)
+clickerBtn.Text = "⚡ Auto Clicker: OFF"
+clickerBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
 
--- CLICKER
-local clickerBtn=Instance.new("TextButton",panel)
-clickerBtn.Size=UDim2.new(0,120,0,32)
-clickerBtn.Position=UDim2.new(0,10,0,40)
-clickerBtn.BackgroundColor3=Color3.fromRGB(40,180,100)
-clickerBtn.Text="Clicker: Off"
-clickerBtn.TextColor3=Color3.fromRGB(240,240,240)
-clickerBtn.Font=Enum.Font.GothamBold clickerBtn.TextSize=14
-Instance.new("UICorner",clickerBtn).CornerRadius=UDim.new(0,8)
+local poolBtn = Instance.new("TextButton", Frame)
+poolBtn.Size = UDim2.new(1, -10, 0, 40)
+poolBtn.Text = "🏊 Auto Pool: OFF"
+poolBtn.BackgroundColor3 = Color3.fromRGB(200,120,50)
 
--- SPEED
-local speedBox=Instance.new("TextBox",panel)
-speedBox.Size=UDim2.new(0,60,0,26)
-speedBox.Position=UDim2.new(0,10,0,90)
-speedBox.BackgroundColor3=Color3.fromRGB(40,40,40)
-speedBox.Text="100"
-speedBox.TextColor3=Color3.fromRGB(220,220,220)
-speedBox.Font=Enum.Font.Gotham speedBox.TextSize=14
-speedBox.ClearTextOnFocus=false
-Instance.new("UICorner",speedBox).CornerRadius=UDim.new(0,6)
+local jumpBtn = Instance.new("TextButton", Frame)
+jumpBtn.Size = UDim2.new(1, -10, 0, 40)
+jumpBtn.Text = "🟦 Infinite Jump: OFF"
+jumpBtn.BackgroundColor3 = Color3.fromRGB(80,80,200)
 
--- INFINITE JUMP
-local jumpBtn=Instance.new("TextButton",panel)
-jumpBtn.Size=UDim2.new(0,250,0,30)
-jumpBtn.Position=UDim2.new(0,10,0,150)
-jumpBtn.BackgroundColor3=Color3.fromRGB(80,70,180)
-jumpBtn.Text="Infinite Jump: Off"
-jumpBtn.TextColor3=Color3.fromRGB(240,240,255)
-jumpBtn.Font=Enum.Font.GothamBold jumpBtn.TextSize=14
-Instance.new("UICorner",jumpBtn).CornerRadius=UDim.new(0,8)
+local strengthBtn = Instance.new("TextButton", Frame)
+strengthBtn.Size = UDim2.new(1, -10, 0, 40)
+strengthBtn.Text = "👊 Auto Strength: OFF"
+strengthBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
 
--- POOLS
-local pools={
-	Vector3.new(366,250,-446),
-	Vector3.new(348,264,-499),
-	Vector3.new(1639,260,2250),
-	Vector3.new(-2303,977,1072),
-	Vector3.new(-2051,714,-1893)
-}
-local selectedPool=1
-local poolBtns={}
-for i=1,#pools do
-	local b=Instance.new("TextButton",panel)
-	b.Size=UDim2.new(0,50,0,26)
-	b.Position=UDim2.new(0,10+60*(i-1),0,190)
-	b.BackgroundColor3=Color3.fromRGB(70,70,70)
-	b.TextColor3= i==1 and Color3.fromRGB(100,170,255) or Color3.fromRGB(230,230,230)
-	b.Font=Enum.Font.GothamBold b.TextSize=14
-	b.Text="Pool "..i
-	Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)
-	b.MouseButton1Click:Connect(function()
-		selectedPool=i
-		for j,btn in ipairs(poolBtns) do
-			btn.TextColor3= j==i and Color3.fromRGB(100,170,255) or Color3.fromRGB(230,230,230)
-		end
-	end)
-	table.insert(poolBtns,b)
+local duraBtn = Instance.new("TextButton", Frame)
+duraBtn.Size = UDim2.new(1, -10, 0, 40)
+duraBtn.Text = "❤️ Auto Durability: OFF"
+duraBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
+
+local psychicBtn = Instance.new("TextButton", Frame)
+psychicBtn.Size = UDim2.new(1, -10, 0, 40)
+psychicBtn.Text = "👁 Auto Psychic: OFF"
+psychicBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
+
+local equipBtn = Instance.new("TextButton", Frame)
+equipBtn.Size = UDim2.new(1, -10, 0, 40)
+equipBtn.Text = "🎒 Auto Equip: OFF"
+equipBtn.BackgroundColor3 = Color3.fromRGB(200,150,50)
+
+--// Variables
+local runningClicker = false
+local runningPool = false
+local infiniteJump = false
+local autoStrength = false
+local autoDurability = false
+local autoPsychic = false
+local autoEquip = false
+
+--// Get Spawn Button Position
+local function getSpawnPos()
+    local vps = camera.ViewportSize
+    local x = vps.X/2
+    local y = vps.Y/2 + 120
+    return Vector2.new(x,y)
 end
 
--- AUTO POOL
-local autoPoolBtn=Instance.new("TextButton",panel)
-autoPoolBtn.Size=UDim2.new(0,150,0,28)
-autoPoolBtn.Position=UDim2.new(0,10,0,220)
-autoPoolBtn.BackgroundColor3=Color3.fromRGB(200,120,50)
-autoPoolBtn.Text="Auto Pool: Off"
-autoPoolBtn.TextColor3=Color3.fromRGB(240,240,240)
-autoPoolBtn.Font=Enum.Font.GothamBold autoPoolBtn.TextSize=14
-Instance.new("UICorner",autoPoolBtn).CornerRadius=UDim.new(0,8)
-
--- DISCORD
-local discordBtn=Instance.new("TextButton",panel)
-discordBtn.Size=UDim2.new(0,150,0,28)
-discordBtn.Position=UDim2.new(0,10,0,260)
-discordBtn.BackgroundColor3=Color3.fromRGB(80,80,220)
-discordBtn.Text="Discord"
-discordBtn.TextColor3=Color3.fromRGB(240,240,240)
-discordBtn.Font=Enum.Font.GothamBold discordBtn.TextSize=14
-Instance.new("UICorner",discordBtn).CornerRadius=UDim.new(0,8)
-discordBtn.MouseButton1Click:Connect(function()
-	if setclipboard then setclipboard("https://discord.gg/xwUDTAKFK5") end
-end)
-
-----------------------------------------------------------------
---               AIM CIRCLE (DRAGGABLE TARGET)
-----------------------------------------------------------------
-local aimRing=Instance.new("Frame")
-aimRing.Name="AimRing"
-aimRing.Size=UDim2.new(0,64,0,64)
-aimRing.Position=UDim2.new(0.5,-32,0.6,-32)
-aimRing.BackgroundTransparency=1
-aimRing.Visible=false
-aimRing.ZIndex=9999
-aimRing.Parent=gui
-
--- Circle look: transparent fill + stroke
-local ringFill=Instance.new("Frame",aimRing)
-ringFill.Size=UDim2.new(1,0,1,0)
-ringFill.BackgroundColor3=Color3.fromRGB(255,255,255)
-ringFill.BackgroundTransparency=0.9
-local corner=Instance.new("UICorner",ringFill); corner.CornerRadius=UDim.new(1,0)
-local stroke=Instance.new("UIStroke",ringFill)
-stroke.Thickness=2
-stroke.Color=Color3.fromRGB(80,160,255)
-stroke.Transparency=0
-
--- Toggle button for ring
-local ringBtn=Instance.new("TextButton",panel)
-ringBtn.Size=UDim2.new(0,150,0,28)
-ringBtn.Position=UDim2.new(0,160,0,40)
-ringBtn.BackgroundColor3=Color3.fromRGB(60,120,220)
-ringBtn.Text="Aim Circle: Show"
-ringBtn.TextColor3=Color3.fromRGB(240,240,240)
-ringBtn.Font=Enum.Font.GothamBold ringBtn.TextSize=14
-Instance.new("UICorner",ringBtn).CornerRadius=UDim.new(0,8)
-
--- Custom dragging (kusursuz ve drag sırasında click durur)
-local dragging=false; local dragOffset=Vector2.new()
-aimRing.InputBegan:Connect(function(input)
-	if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
-		dragging=true
-		local pos=aimRing.AbsolutePosition
-		if input.Position then dragOffset=Vector2.new(input.Position.X-pos.X,input.Position.Y-pos.Y) end
-		input.Changed:Connect(function()
-			if input.UserInputState==Enum.UserInputState.End then dragging=false end
-		end)
-	end
-end)
-UserInputService.InputChanged:Connect(function(input)
-	if dragging and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch) then
-		local newPos=input.Position- dragOffset
-		aimRing.Position=UDim2.fromOffset(newPos.X,newPos.Y)
+--// AutoClicker (Spawn)
+task.spawn(function()
+	while true do
+		if runningClicker then
+			local pos = getSpawnPos()
+			VirtualInputManager:SendMouseButtonEvent(pos.X, pos.Y, 0, true, game, 1)
+			VirtualInputManager:SendMouseButtonEvent(pos.X, pos.Y, 0, false, game, 1)
+			task.wait(0.3)
+		else
+			task.wait(0.2)
+		end
 	end
 end)
 
-ringBtn.MouseButton1Click:Connect(function()
-	aimRing.Visible=not aimRing.Visible
-	ringBtn.Text=aimRing.Visible and "Aim Circle: Hide" or "Aim Circle: Show"
+--// AutoPool Loop
+task.spawn(function()
+	while true do
+		if runningPool then
+			print("Auto Pool Active")
+			-- Buraya direkt havuz koordinatına teleport kodu eklenebilir
+		end
+		task.wait(1)
+	end
 end)
 
-----------------------------------------------------------------
---                       STATE VARS
-----------------------------------------------------------------
-local running=false
-local infiniteJump=false
-local autoPool=false
-local hasTeleported=false
-local lastPos=nil
+--// Auto Strength
+task.spawn(function()
+	while true do
+		if autoStrength then
+			VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
+			VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
+		end
+		task.wait(0.5)
+	end
+end)
+
+--// Auto Durability
+task.spawn(function()
+	while true do
+		if autoDurability then
+			VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Two, false, game)
+			VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Two, false, game)
+		end
+		task.wait(0.5)
+	end
+end)
+
+--// Auto Psychic (with Double Jump → Fly → 10x Bonus)
+task.spawn(function()
+	while true do
+		if autoPsychic then
+			-- Double jump
+			for i = 1,2 do
+				if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+					player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+				end
+				task.wait(0.2)
+			end
+			-- Psychic (3. slot)
+			for i = 1,10 do -- 10x bonus
+				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
+				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
+				task.wait(0.1)
+			end
+		end
+		task.wait(1)
+	end
+end)
+
+--// Infinite Jump
+UserInputService.JumpRequest:Connect(function()
+	if infiniteJump then
+		if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+			player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+		end
+	end
+end)
+
+--// Auto Equip Items
+task.spawn(function()
+	while true do
+		if autoEquip then
+			local itemsToEquip = {"Item1","Item2","Item3"} -- Buraya item adlarını yaz
+			local backpack = player:FindFirstChild("Backpack")
+			if backpack then
+				for _, itemName in pairs(itemsToEquip) do
+					if backpack:FindFirstChild(itemName) then
+						local item = backpack[itemName]
+						item.Parent = player.Character
+					end
+				end
+			end
+		end
+		task.wait(1)
+	end
+end)
+
+--// Button Functions
+local function toggleBtn(btn,var,textOn,textOff,colorOn,colorOff)
+	_G[var] = not _G[var]
+	btn.Text = _G[var] and textOn or textOff
+	btn.BackgroundColor3 = _G[var] and colorOn or colorOff
+end
 
 clickerBtn.MouseButton1Click:Connect(function()
-	running=not running
-	clickerBtn.Text=running and "Clicker: On" or "Clicker: Off"
-	clickerBtn.BackgroundColor3=running and Color3.fromRGB(200,80,80) or Color3.fromRGB(40,180,100)
+	toggleBtn(clickerBtn,"runningClicker","⚡ Auto Clicker: ON","⚡ Auto Clicker: OFF",Color3.fromRGB(50,200,50),Color3.fromRGB(200,50,50))
+end)
+
+poolBtn.MouseButton1Click:Connect(function()
+	toggleBtn(poolBtn,"runningPool","🏊 Auto Pool: ON","🏊 Auto Pool: OFF",Color3.fromRGB(50,200,200),Color3.fromRGB(200,120,50))
 end)
 
 jumpBtn.MouseButton1Click:Connect(function()
-	infiniteJump=not infiniteJump
-	jumpBtn.Text=infiniteJump and "Infinite Jump: On" or "Infinite Jump: Off"
+	toggleBtn(jumpBtn,"infiniteJump","🟦 Infinite Jump: ON","🟦 Infinite Jump: OFF",Color3.fromRGB(50,150,250),Color3.fromRGB(80,80,200))
 end)
 
-autoPoolBtn.MouseButton1Click:Connect(function()
-	autoPool=not autoPool
-	autoPoolBtn.Text=autoPool and "Auto Pool: On" or "Auto Pool: Off"
-	hasTeleported=false
+strengthBtn.MouseButton1Click:Connect(function()
+	toggleBtn(strengthBtn,"autoStrength","👊 Auto Strength: ON","👊 Auto Strength: OFF",Color3.fromRGB(50,200,50),Color3.fromRGB(200,50,50))
 end)
 
-----------------------------------------------------------------
---                     CLICK LOOP (AIM CENTER)
-----------------------------------------------------------------
-task.spawn(function()
-	while true do
-		if running and aimRing.Visible and not dragging then
-			local center=aimRing.AbsolutePosition + aimRing.AbsoluteSize/2
-			VirtualInputManager:SendMouseButtonEvent(center.X,center.Y,0,true,game,1)
-			VirtualInputManager:SendMouseButtonEvent(center.X,center.Y,0,false,game,1)
-			local spd=tonumber(speedBox.Text) or 100
-			task.wait(math.max(spd/1000,0.01))
-		else
-			task.wait(0.05)
-		end
-	end
+duraBtn.MouseButton1Click:Connect(function()
+	toggleBtn(duraBtn,"autoDurability","❤️ Auto Durability: ON","❤️ Auto Durability: OFF",Color3.fromRGB(50,200,50),Color3.fromRGB(200,50,50))
 end)
 
-----------------------------------------------------------------
---                 INFINITE JUMP LOOP
-----------------------------------------------------------------
-RunService.RenderStepped:Connect(function()
-	if infiniteJump then
-		local char=p.Character
-		if char then
-			local hum=char:FindFirstChildOfClass("Humanoid")
-			if hum and hum:GetState()==Enum.HumanoidStateType.Landed then
-				hum:ChangeState(Enum.HumanoidStateType.Jumping)
-			end
-		end
-	end
+psychicBtn.MouseButton1Click:Connect(function()
+	toggleBtn(psychicBtn,"autoPsychic","👁 Auto Psychic: ON","👁 Auto Psychic: OFF",Color3.fromRGB(50,200,50),Color3.fromRGB(200,50,50))
 end)
 
-----------------------------------------------------------------
---                   AUTO POOL (DIRECT TELEPORT)
-----------------------------------------------------------------
-local function doTeleport()
-	local char=p.Character
-	if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
-		char.HumanoidRootPart.CFrame=CFrame.new(pools[selectedPool])
-		hasTeleported=true
-	end
-end
-
-RunService.RenderStepped:Connect(function()
-	local char=p.Character
-	if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
-		local pos=char.HumanoidRootPart.Position
-		if lastPos and (pos-lastPos).Magnitude>1 then hasTeleported=false end
-		lastPos=pos
-	end
+equipBtn.MouseButton1Click:Connect(function()
+	toggleBtn(equipBtn,"autoEquip","🎒 Auto Equip: ON","🎒 Auto Equip: OFF",Color3.fromRGB(50,200,50),Color3.fromRGB(200,150,50))
 end)
-
-task.spawn(function()
-	while true do
-		if autoPool and not hasTeleported then doTeleport() end
-		task.wait(0.4)
-	end
-end)
-
-----------------------------------------------------------------
---                DEATH / RESPAWN CONTINUITY
-----------------------------------------------------------------
-local function setupDeathHandler()
-	local function connectDied()
-		local char=p.Character
-		if char then
-			local hum=char:FindFirstChildOfClass("Humanoid")
-			if hum then
-				hum.Died:Connect(function()
-					hasTeleported=false
-					task.wait(1)
-					p.CharacterAdded:Wait()
-					task.wait(0.5)
-					doTeleport()
-				end)
-			end
-		end
-	end
-	p.CharacterAdded:Connect(function() task.wait(0.5); connectDied() end)
-	connectDied()
-end
-setupDeathHandler()
