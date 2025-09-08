@@ -200,3 +200,27 @@ task.spawn(function()
 		task.wait(0.5)
 	end
 end)
+
+-- Death / Reset handling
+local function setupDeathHandler()
+	local function connectDied()
+		local char = p.Character
+		if char and char:FindFirstChild("Humanoid") then
+			local hum = char.Humanoid
+			hum.Died:Connect(function()
+				hasTeleported = false
+				task.wait(1)
+				p.CharacterAdded:Wait()
+				task.wait(0.5)
+				doTeleport()
+			end)
+		end
+	end
+	p.CharacterAdded:Connect(function()
+		task.wait(0.5)
+		connectDied()
+	end)
+	connectDied()
+end
+
+setupDeathHandler()
