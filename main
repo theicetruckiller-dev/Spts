@@ -88,15 +88,6 @@ speedBox.TextSize=14
 speedBox.ClearTextOnFocus=false
 Instance.new("UICorner",speedBox).CornerRadius=UDim.new(0,6)
 
-local speedLabel=Instance.new("TextLabel",panel)
-speedLabel.Text="Hız (ms)"
-speedLabel.Size=UDim2.new(0,80,0,20)
-speedLabel.Position=UDim2.new(0,10,0,118)
-speedLabel.BackgroundTransparency=1
-speedLabel.TextColor3=Color3.fromRGB(200,200,200)
-speedLabel.Font=Enum.Font.Gotham
-speedLabel.TextSize=13
-
 -- Hazır hız butonları
 local speeds={["Hızlı"]=50,["Orta"]=100,["Yavaş"]=300}
 local xPos=100
@@ -224,17 +215,25 @@ RunService.RenderStepped:Connect(function()
  end
 end)
 
--- Auto Havuz sistemi
+-- Auto Havuz sistemi ve spawn sonrası ışınlama
+local function teleportToPool(char)
+    while autoPool and char and char:FindFirstChild("HumanoidRootPart") do
+        local poolNum = tonumber(poolBox.Text) or 1
+        poolNum = math.clamp(poolNum, 1, #pools)
+        char.HumanoidRootPart.CFrame = CFrame.new(pools[poolNum])
+        task.wait(1)
+    end
+end
+
 task.spawn(function()
- while true do
-  if autoPool then
-   local poolNum=tonumber(poolBox.Text) or 1
-   poolNum=math.clamp(poolNum,1,#pools)
-   local target=pools[poolNum]
-   if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-    p.Character.HumanoidRootPart.CFrame=CFrame.new(target)
-   end
-  end
-  task.wait(1)
- end
+    if autoPool and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+        teleportToPool(p.Character)
+    end
+end)
+
+p.CharacterAdded:Connect(function(char)
+    char:WaitForChild("HumanoidRootPart")
+    task.spawn(function()
+        teleportToPool(char)
+    end)
 end)
