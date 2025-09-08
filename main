@@ -1,98 +1,164 @@
-local Players=game:GetService("Players")
-local RunService=game:GetService("RunService")
-local UserInputService=game:GetService("UserInputService")
-local VirtualInputManager=game:GetService("VirtualInputManager")
-local p=Players.LocalPlayer
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local Player = Players.LocalPlayer
 
 -- GUI ROOT
-local gui=Instance.new("ScreenGui")
-gui.Name="SPTSAuto"
-gui.ResetOnSpawn=false
-gui.Parent=p:WaitForChild("PlayerGui")
+local gui = Instance.new("ScreenGui")
+gui.Name = "SPTSAuto"
+gui.ResetOnSpawn = false
+gui.Parent = Player:WaitForChild("PlayerGui")
 
 -- PANEL
-local panel=Instance.new("Frame",gui)
-panel.Size=UDim2.new(0,320,0,300)
-panel.Position=UDim2.new(0.05,0,0.5,0)
-panel.BackgroundColor3=Color3.fromRGB(25,25,25)
-panel.Active=true panel.Draggable=true
-Instance.new("UICorner",panel).CornerRadius=UDim.new(0,12)
+local panel = Instance.new("Frame", gui)
+panel.Size = UDim2.new(0, 320, 0, 350)
+panel.Position = UDim2.new(0.05, 0, 0.5, 0)
+panel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+panel.Active = true
+panel.Draggable = true
+Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 12)
 
 -- TOGGLE (göz)
-local toggleBtn=Instance.new("TextButton",gui)
-toggleBtn.Size=UDim2.new(0,50,0,50)
-toggleBtn.Position=UDim2.new(0.01,0,0.5,0)
-toggleBtn.BackgroundColor3=Color3.fromRGB(40,40,40)
-toggleBtn.Text="👁️" toggleBtn.TextColor3=Color3.fromRGB(230,230,230)
-toggleBtn.Font=Enum.Font.GothamBold toggleBtn.TextSize=26
-toggleBtn.Active=true toggleBtn.Draggable=true
-Instance.new("UICorner",toggleBtn).CornerRadius=UDim.new(1,0)
-local panelVisible=true
+local toggleBtn = Instance.new("TextButton", gui)
+toggleBtn.Size = UDim2.new(0, 50, 0, 50)
+toggleBtn.Position = UDim2.new(0.01, 0, 0.5, 0)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+toggleBtn.Text = "👁️"
+toggleBtn.TextColor3 = Color3.fromRGB(230, 230, 230)
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextSize = 26
+toggleBtn.Active = true
+toggleBtn.Draggable = true
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(1, 0)
+local panelVisible = true
 toggleBtn.MouseButton1Click:Connect(function()
-	panelVisible=not panelVisible
-	panel.Visible=panelVisible
-	toggleBtn.Text=panelVisible and "👁️" or "❌"
+	panelVisible = not panelVisible
+	panel.Visible = panelVisible
+	toggleBtn.Text = panelVisible and "👁️" or "❌"
 end)
 
 -- TITLE
-local title=Instance.new("TextLabel",panel)
-title.Text="⚡ SPTS Auto (by Zwac)"
-title.Size=UDim2.new(1,0,0,28)
-title.Position=UDim2.new(0,0,0,2)
-title.BackgroundTransparency=1
-title.TextColor3=Color3.fromRGB(230,230,230)
-title.Font=Enum.Font.GothamBold title.TextSize=18
+local title = Instance.new("TextLabel", panel)
+title.Text = "⚡ SPTS Auto (by Zwac)"
+title.Size = UDim2.new(1, 0, 0, 28)
+title.Position = UDim2.new(0, 0, 0, 2)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(230, 230, 230)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
 
--- CLICKER
-local clickerBtn=Instance.new("TextButton",panel)
-clickerBtn.Size=UDim2.new(0,120,0,32)
-clickerBtn.Position=UDim2.new(0,10,0,40)
-clickerBtn.BackgroundColor3=Color3.fromRGB(40,180,100)
-clickerBtn.Text="Clicker: Off"
-clickerBtn.TextColor3=Color3.fromRGB(240,240,240)
-clickerBtn.Font=Enum.Font.GothamBold clickerBtn.TextSize=14
-Instance.new("UICorner",clickerBtn).CornerRadius=UDim.new(0,8)
+-- CLICKER PANEL
+local clickerLabel = Instance.new("TextLabel", panel)
+clickerLabel.Text = "Auto Clicker"
+clickerLabel.Size = UDim2.new(0, 150, 0, 24)
+clickerLabel.Position = UDim2.new(0, 10, 0, 40)
+clickerLabel.BackgroundTransparency = 1
+clickerLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+clickerLabel.Font = Enum.Font.GothamBold
+clickerLabel.TextSize = 14
 
--- SPEED
-local speedBox=Instance.new("TextBox",panel)
-speedBox.Size=UDim2.new(0,60,0,26)
-speedBox.Position=UDim2.new(0,10,0,90)
-speedBox.BackgroundColor3=Color3.fromRGB(40,40,40)
-speedBox.Text="100"
-speedBox.TextColor3=Color3.fromRGB(220,220,220)
-speedBox.Font=Enum.Font.Gotham speedBox.TextSize=14
-speedBox.ClearTextOnFocus=false
-Instance.new("UICorner",speedBox).CornerRadius=UDim.new(0,6)
+local clickerBtn = Instance.new("TextButton", panel)
+clickerBtn.Size = UDim2.new(0, 100, 0, 32)
+clickerBtn.Position = UDim2.new(0, 10, 0, 65)
+clickerBtn.BackgroundColor3 = Color3.fromRGB(40, 180, 100)
+clickerBtn.Text = "Off"
+clickerBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
+clickerBtn.Font = Enum.Font.GothamBold
+clickerBtn.TextSize = 14
+Instance.new("UICorner", clickerBtn).CornerRadius = UDim.new(0, 8)
+
+-- SPEED MODES
+local speeds = {["Yavaş"] = 0.5, ["Orta"] = 0.2, ["Hızlı"] = 0.05}
+local currentSpeed = speeds["Orta"]
+
+local speedBtn = Instance.new("TextButton", panel)
+speedBtn.Size = UDim2.new(0, 100, 0, 32)
+speedBtn.Position = UDim2.new(0, 120, 0, 65)
+speedBtn.BackgroundColor3 = Color3.fromRGB(70, 130, 200)
+speedBtn.Text = "Orta"
+speedBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
+speedBtn.Font = Enum.Font.GothamBold
+speedBtn.TextSize = 14
+Instance.new("UICorner", speedBtn).CornerRadius = UDim.new(0, 8)
+
+-- SPEED CYCLE
+speedBtn.MouseButton1Click:Connect(function()
+	if speedBtn.Text == "Yavaş" then
+		speedBtn.Text = "Orta"
+	elseif speedBtn.Text == "Orta" then
+		speedBtn.Text = "Hızlı"
+	else
+		speedBtn.Text = "Yavaş"
+	end
+	currentSpeed = speeds[speedBtn.Text]
+end)
+
+-- CLICK LOOP
+local clickerActive = false
+local clickPos = Vector2.new(960, 540) -- örnek spawn pozisyonu (ekrana göre ayarlayabilirsin)
+clickerBtn.MouseButton1Click:Connect(function()
+	clickerActive = not clickerActive
+	clickerBtn.Text = clickerActive and "On" or "Off"
+end)
+
+RunService.RenderStepped:Connect(function()
+	if clickerActive then
+		VirtualInputManager:SendMouseButtonEvent(clickPos.X, clickPos.Y, 0, true, game, 1)
+		VirtualInputManager:SendMouseButtonEvent(clickPos.X, clickPos.Y, 0, false, game, 1)
+		task.wait(currentSpeed)
+	end
+end)
 
 -- INFINITE JUMP
-local jumpBtn=Instance.new("TextButton",panel)
-jumpBtn.Size=UDim2.new(0,250,0,30)
-jumpBtn.Position=UDim2.new(0,10,0,150)
-jumpBtn.BackgroundColor3=Color3.fromRGB(80,70,180)
-jumpBtn.Text="Infinite Jump: Off"
-jumpBtn.TextColor3=Color3.fromRGB(240,240,255)
-jumpBtn.Font=Enum.Font.GothamBold jumpBtn.TextSize=14
-Instance.new("UICorner",jumpBtn).CornerRadius=UDim.new(0,8)
+local jumpBtn = Instance.new("TextButton", panel)
+jumpBtn.Size = UDim2.new(0, 250, 0, 30)
+jumpBtn.Position = UDim2.new(0, 10, 0, 110)
+jumpBtn.BackgroundColor3 = Color3.fromRGB(80, 70, 180)
+jumpBtn.Text = "Infinite Jump: Off"
+jumpBtn.TextColor3 = Color3.fromRGB(240, 240, 255)
+jumpBtn.Font = Enum.Font.GothamBold
+jumpBtn.TextSize = 14
+Instance.new("UICorner", jumpBtn).CornerRadius = UDim.new(0, 8)
+
+local infiniteJump = false
+jumpBtn.MouseButton1Click:Connect(function()
+	infiniteJump = not infiniteJump
+	jumpBtn.Text = infiniteJump and "Infinite Jump: On" or "Infinite Jump: Off"
+end)
+
+RunService.RenderStepped:Connect(function()
+	if infiniteJump then
+		local char = Player.Character
+		if char then
+			local hum = char:FindFirstChildOfClass("Humanoid")
+			if hum and hum:GetState() == Enum.HumanoidStateType.Landed then
+				hum:ChangeState(Enum.HumanoidStateType.Jumping)
+			end
+		end
+	end
+end)
 
 -- POOLS
-local pools={
+local pools = {
 	Vector3.new(366,250,-446),
 	Vector3.new(348,264,-499),
 	Vector3.new(1639,260,2250),
 	Vector3.new(-2303,977,1072),
 	Vector3.new(-2051,714,-1893)
 }
-local selectedPool=1
-local poolBtns={}
+local selectedPool = 1
+local poolBtns = {}
 for i=1,#pools do
-	local b=Instance.new("TextButton",panel)
-	b.Size=UDim2.new(0,50,0,26)
-	b.Position=UDim2.new(0,10+60*(i-1),0,190)
-	b.BackgroundColor3=Color3.fromRGB(70,70,70)
-	b.TextColor3= i==1 and Color3.fromRGB(100,170,255) or Color3.fromRGB(230,230,230)
-	b.Font=Enum.Font.GothamBold b.TextSize=14
-	b.Text="Pool "..i
-	Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)
+	local b = Instance.new("TextButton", panel)
+	b.Size = UDim2.new(0, 50, 0, 26)
+	b.Position = UDim2.new(0, 10+60*(i-1), 0, 160)
+	b.BackgroundColor3 = Color3.fromRGB(70,70,70)
+	b.TextColor3 = i==1 and Color3.fromRGB(100,170,255) or Color3.fromRGB(230,230,230)
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 14
+	b.Text = "Pool "..i
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
 	b.MouseButton1Click:Connect(function()
 		selectedPool=i
 		for j,btn in ipairs(poolBtns) do
@@ -102,98 +168,37 @@ for i=1,#pools do
 	table.insert(poolBtns,b)
 end
 
--- AUTO POOL
-local autoPoolBtn=Instance.new("TextButton",panel)
-autoPoolBtn.Size=UDim2.new(0,150,0,28)
-autoPoolBtn.Position=UDim2.new(0,10,0,220)
-autoPoolBtn.BackgroundColor3=Color3.fromRGB(200,120,50)
-autoPoolBtn.Text="Auto Pool: Off"
-autoPoolBtn.TextColor3=Color3.fromRGB(240,240,240)
-autoPoolBtn.Font=Enum.Font.GothamBold autoPoolBtn.TextSize=14
-Instance.new("UICorner",autoPoolBtn).CornerRadius=UDim.new(0,8)
+local autoPoolBtn = Instance.new("TextButton", panel)
+autoPoolBtn.Size = UDim2.new(0,150,0,28)
+autoPoolBtn.Position = UDim2.new(0,10,0,260)
+autoPoolBtn.BackgroundColor3 = Color3.fromRGB(200,120,50)
+autoPoolBtn.Text = "Auto Pool: Off"
+autoPoolBtn.TextColor3 = Color3.fromRGB(240,240,240)
+autoPoolBtn.Font = Enum.Font.GothamBold
+autoPoolBtn.TextSize = 14
+Instance.new("UICorner", autoPoolBtn).CornerRadius = UDim.new(0,8)
 
--- DISCORD
-local discordBtn=Instance.new("TextButton",panel)
-discordBtn.Size=UDim2.new(0,150,0,28)
-discordBtn.Position=UDim2.new(0,10,0,260)
-discordBtn.BackgroundColor3=Color3.fromRGB(80,80,220)
-discordBtn.Text="Discord"
-discordBtn.TextColor3=Color3.fromRGB(240,240,240)
-discordBtn.Font=Enum.Font.GothamBold discordBtn.TextSize=14
-Instance.new("UICorner",discordBtn).CornerRadius=UDim.new(0,8)
-discordBtn.MouseButton1Click:Connect(function()
-	if setclipboard then setclipboard("https://discord.gg/xwUDTAKFK5") end
+local autoPool = false
+local hasTeleported = false
+local lastPos = nil
+autoPoolBtn.MouseButton1Click:Connect(function()
+	autoPool = not autoPool
+	autoPoolBtn.Text = autoPool and "Auto Pool: On" or "Auto Pool: Off"
+	hasTeleported = false
 end)
 
--- STATE VARS
-local running=false
-local infiniteJump=false
-local autoPool=false
-local hasTeleported=false
-local lastPos=nil
-
--- MOBILE SPAWN CLICKER
-local clickPos=nil
-local clickActive=false
-
-clickerBtn.MouseButton1Click:Connect(function()
-	if clickPos then
-		clickActive = not clickActive
-		clickerBtn.Text = clickActive and "Clicker: On" or "Clicker: Off"
-		clickerBtn.BackgroundColor3 = clickActive and Color3.fromRGB(200,80,80) or Color3.fromRGB(40,180,100)
-	else
-		clickerBtn.Text = "Tap Spawn to Set Pos"
-	end
-end)
-
--- Kullanıcının spawn butonuna dokunmasını yakala
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if input.UserInputType==Enum.UserInputType.Touch then
-		if not clickPos then
-			clickPos = input.Position
-			print("Spawn click position saved at:", clickPos)
-			clickActive = true
-			clickerBtn.Text = "Clicker: On"
-			clickerBtn.BackgroundColor3 = Color3.fromRGB(200,80,80)
-		end
-	end
-end)
-
--- Sonsuz tıklama
-RunService.RenderStepped:Connect(function()
-	if clickActive and clickPos then
-		VirtualInputManager:SendMouseButtonEvent(clickPos.X, clickPos.Y, 0, true, game, 1)
-		VirtualInputManager:SendMouseButtonEvent(clickPos.X, clickPos.Y, 0, false, game, 1)
-	end
-end)
-
--- INFINITE JUMP LOOP
-RunService.RenderStepped:Connect(function()
-	if infiniteJump then
-		local char=p.Character
-		if char then
-			local hum=char:FindFirstChildOfClass("Humanoid")
-			if hum and hum:GetState()==Enum.HumanoidStateType.Landed then
-				hum:ChangeState(Enum.HumanoidStateType.Jumping)
-			end
-		end
-	end
-end)
-
--- AUTO POOL
 local function doTeleport()
-	local char=p.Character
+	local char = Player.Character
 	if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
-		char.HumanoidRootPart.CFrame=CFrame.new(pools[selectedPool])
+		char.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
 		hasTeleported=true
 	end
 end
 
 RunService.RenderStepped:Connect(function()
-	local char=p.Character
+	local char = Player.Character
 	if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
-		local pos=char.HumanoidRootPart.Position
+		local pos = char.HumanoidRootPart.Position
 		if lastPos and (pos-lastPos).Magnitude>1 then hasTeleported=false end
 		lastPos=pos
 	end
@@ -206,24 +211,23 @@ task.spawn(function()
 	end
 end)
 
--- DEATH / RESPAWN
 local function setupDeathHandler()
 	local function connectDied()
-		local char=p.Character
+		local char=Player.Character
 		if char then
 			local hum=char:FindFirstChildOfClass("Humanoid")
 			if hum then
 				hum.Died:Connect(function()
 					hasTeleported=false
 					task.wait(1)
-					p.CharacterAdded:Wait()
+					Player.CharacterAdded:Wait()
 					task.wait(0.5)
 					doTeleport()
 				end)
 			end
 		end
 	end
-	p.CharacterAdded:Connect(function() task.wait(0.5); connectDied() end)
+	Player.CharacterAdded:Connect(function() task.wait(0.5); connectDied() end)
 	connectDied()
 end
 setupDeathHandler()
