@@ -2,11 +2,11 @@ local p=game:GetService("Players").LocalPlayer
 local vim=game:GetService("VirtualInputManager")
 local RunService=game:GetService("RunService")
 
+-- GUI
 local gui=Instance.new("ScreenGui",p:WaitForChild("PlayerGui"))
 gui.Name="SPTSAutoClicker"
 gui.ResetOnSpawn=false
 
--- Ana Panel
 local panel=Instance.new("Frame",gui)
 panel.BackgroundColor3=Color3.fromRGB(25,25,25)
 panel.Size=UDim2.new(0,300,0,270)
@@ -15,7 +15,7 @@ panel.Active=true
 panel.Draggable=true
 Instance.new("UICorner",panel).CornerRadius=UDim.new(0,12)
 
--- Toggle Butonu (göz ikonu)
+-- Toggle butonu
 local toggleBtn=Instance.new("TextButton",gui)
 toggleBtn.Size=UDim2.new(0,50,0,50)
 toggleBtn.Position=UDim2.new(0.01,0,0.5,0)
@@ -67,6 +67,7 @@ slotBox.TextSize=14
 slotBox.ClearTextOnFocus=false
 Instance.new("UICorner",slotBox).CornerRadius=UDim.new(0,6)
 
+-- Slot Label
 local slotLabel=Instance.new("TextLabel",panel)
 slotLabel.Text="Slot (1-4)"
 slotLabel.Size=UDim2.new(0,80,0,20)
@@ -88,7 +89,7 @@ speedBox.TextSize=14
 speedBox.ClearTextOnFocus=false
 Instance.new("UICorner",speedBox).CornerRadius=UDim.new(0,6)
 
--- Hazır hız butonları
+-- Hız butonları
 local speeds={["Hızlı"]=50,["Orta"]=100,["Yavaş"]=300}
 local xPos=100
 local currentSpeed=100
@@ -106,7 +107,7 @@ for n,s in pairs(speeds)do
  xPos=xPos+70
 end
 
--- Infinite Jump Butonu
+-- Infinite Jump
 local jumpBtn=Instance.new("TextButton",panel)
 jumpBtn.Size=UDim2.new(0,250,0,30)
 jumpBtn.Position=UDim2.new(0,10,0,150)
@@ -117,15 +118,14 @@ jumpBtn.Font=Enum.Font.GothamBold
 jumpBtn.TextSize=14
 Instance.new("UICorner",jumpBtn).CornerRadius=UDim.new(0,8)
 
--- Auto Havuz Seçimi
-local pools = {
- Vector3.new(366, 250, -446),
- Vector3.new(348, 264, -499),
- Vector3.new(1639, 260, 2250),
- Vector3.new(-2303, 977, 1072),
- Vector3.new(-2051, 714, -1893)
+-- Havuz GUI
+local pools={
+ Vector3.new(366,250,-446),
+ Vector3.new(348,264,-499),
+ Vector3.new(1639,260,2250),
+ Vector3.new(-2303,977,1072),
+ Vector3.new(-2051,714,-1893)
 }
-
 local poolLabel=Instance.new("TextLabel",panel)
 poolLabel.Text="Havuz Seç (1-5)"
 poolLabel.Size=UDim2.new(0,120,0,20)
@@ -165,12 +165,6 @@ clickerBtn.MouseButton1Click:Connect(function()
  running=not running
  clickerBtn.Text=running and "Clicker: Açık" or "Clicker: Kapalı"
  clickerBtn.BackgroundColor3=running and Color3.fromRGB(200,80,80) or Color3.fromRGB(40,180,100)
- if running then
-  local slot=tonumber(slotBox.Text)or 1
-  local keys={[1]="One",[2]="Two",[3]="Three",[4]="Four"}
-  local k=keys[slot]
-  if k then vim:SendKeyEvent(true,k,false,game)vim:SendKeyEvent(false,k,false,game)end
- end
 end)
 
 jumpBtn.MouseButton1Click:Connect(function()
@@ -190,7 +184,6 @@ task.spawn(function()
    local spd=tonumber(speedBox.Text)or currentSpeed
    local x=workspace.CurrentCamera.ViewportSize.X/2
    local y=workspace.CurrentCamera.ViewportSize.Y/2
-   if mouse1click then mouse1click() end
    vim:SendMouseButtonEvent(x,y,0,true,game,1)
    vim:SendMouseButtonEvent(x,y,0,false,game,1)
    task.wait(math.max(spd/1000,0.01))
@@ -198,7 +191,7 @@ task.spawn(function()
  end
 end)
 
--- Infinite jump sistemi
+-- Infinite jump
 local lastJump=tick()
 RunService.RenderStepped:Connect(function()
  if infiniteJump then
@@ -215,25 +208,26 @@ RunService.RenderStepped:Connect(function()
  end
 end)
 
--- Auto Havuz sistemi ve spawn sonrası ışınlama
-local function teleportToPool(char)
-    while autoPool and char and char:FindFirstChild("HumanoidRootPart") do
-        local poolNum = tonumber(poolBox.Text) or 1
-        poolNum = math.clamp(poolNum, 1, #pools)
-        char.HumanoidRootPart.CFrame = CFrame.new(pools[poolNum])
-        task.wait(1)
-    end
+-- Auto Havuz / Spawn sonrası ışınlama (önceki kod bozulmadı)
+local function startAutoPool(char)
+    task.spawn(function()
+        while autoPool and char and char:FindFirstChild("HumanoidRootPart") do
+            local poolNum = tonumber(poolBox.Text) or 1
+            poolNum = math.clamp(poolNum,1,#pools)
+            -- Önceki scriptin birebir havuz ışınlama kodu
+            char.HumanoidRootPart.CFrame = CFrame.new(pools[poolNum])
+            task.wait(1)
+        end
+    end)
 end
 
-task.spawn(function()
-    if autoPool and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-        teleportToPool(p.Character)
-    end
-end)
-
+-- Karakter spawn sonrası tetikleme
 p.CharacterAdded:Connect(function(char)
     char:WaitForChild("HumanoidRootPart")
-    task.spawn(function()
-        teleportToPool(char)
-    end)
+    if autoPool then startAutoPool(char) end
 end)
+
+-- Mevcut karakter varsa başlat
+if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+    startAutoPool(p.Character)
+end
