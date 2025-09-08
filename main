@@ -1,6 +1,7 @@
 local p=game:GetService("Players").LocalPlayer
 local vim=game:GetService("VirtualInputManager")
 local RunService=game:GetService("RunService")
+local CoreGui=game:GetService("CoreGui")
 
 -- GUI
 local gui=Instance.new("ScreenGui",p:WaitForChild("PlayerGui"))
@@ -208,26 +209,6 @@ RunService.RenderStepped:Connect(function()
  end
 end)
 
--- Auto Havuz / Spawn sonrası ışınlama (önceki kod bozulmadı)
+-- Auto Havuz / Spawn sonrası ışınlama
 local function startAutoPool(char)
-    task.spawn(function()
-        while autoPool and char and char:FindFirstChild("HumanoidRootPart") do
-            local poolNum = tonumber(poolBox.Text) or 1
-            poolNum = math.clamp(poolNum,1,#pools)
-            -- Önceki scriptin birebir havuz ışınlama kodu
-            char.HumanoidRootPart.CFrame = CFrame.new(pools[poolNum])
-            task.wait(1)
-        end
-    end)
-end
-
--- Karakter spawn sonrası tetikleme
-p.CharacterAdded:Connect(function(char)
-    char:WaitForChild("HumanoidRootPart")
-    if autoPool then startAutoPool(char) end
-end)
-
--- Mevcut karakter varsa başlat
-if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-    startAutoPool(p.Character)
-end
+    task
