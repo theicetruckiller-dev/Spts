@@ -15,7 +15,15 @@ local clickPosition = Vector2.new(401, 270)
 local itemsSelected = {}
 local selectedPool = 1
 local momentorespawn = false
-local autoStrength = false -- Fist Strength otomatik
+
+local autoStrength = false
+local hasTeleStrengthTeleported = false
+local strengthLocations = {
+    Vector3.new(403, 249, 988),  -- Normal Taş
+    Vector3.new(-2275, 1943, 1051) -- Mavi Kristal
+}
+local selectedStrength = 1
+local fistToggled = false
 
 -- GUI ROOT
 local gui = Instance.new("ScreenGui")
@@ -179,7 +187,7 @@ saveBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- FARMS (1,2,3 Items + AUTO STRENGTH)
+-- FARMS (1,2,3 Items + Auto Strength)
 local farmsFrame = catFrames["Farms"]
 for i=1,3 do
     local btn = Instance.new("TextButton", farmsFrame)
@@ -202,67 +210,43 @@ for i=1,3 do
     end)
 end
 
--- AUTO STRENGTH BUTTON
-local autoStrengthBtn = Instance.new("TextButton", farmsFrame)
-autoStrengthBtn.Size = UDim2.new(0, 120, 0, 28)
-autoStrengthBtn.Position = UDim2.new(0, 70, 0, 80)
-autoStrengthBtn.Text = "Auto Strength: Off"
-autoStrengthBtn.BackgroundColor3 = Color3.fromRGB(200,80,80)
-autoStrengthBtn.TextColor3 = Color3.fromRGB(255,255,255)
-autoStrengthBtn.Font = Enum.Font.GothamBold
-autoStrengthBtn.TextSize = 14
-Instance.new("UICorner", autoStrengthBtn).CornerRadius = UDim.new(0,6)
+-- AUTO STRENGTH BUTTONS
+local strengthBtn = Instance.new("TextButton", farmsFrame)
+strengthBtn.Size = UDim2.new(0,120,0,28)
+strengthBtn.Position = UDim2.new(0, 10, 0, 200)
+strengthBtn.Text = "Auto Strength: Off"
+strengthBtn.BackgroundColor3 = Color3.fromRGB(200,120,50)
+strengthBtn.TextColor3 = Color3.fromRGB(240,240,240)
+strengthBtn.Font = Enum.Font.GothamBold
+strengthBtn.TextSize = 14
+Instance.new("UICorner", strengthBtn).CornerRadius = UDim.new(0,8)
 
-autoStrengthBtn.MouseButton1Click:Connect(function()
+strengthBtn.MouseButton1Click:Connect(function()
     autoStrength = not autoStrength
-    autoStrengthBtn.Text = autoStrength and "Auto Strength: On" or "Auto Strength: Off"
-    autoStrengthBtn.BackgroundColor3 = autoStrength and Color3.fromRGB(70,150,70) or Color3.fromRGB(200,80,80)
+    strengthBtn.Text = autoStrength and "Auto Strength: On" or "Auto Strength: Off"
+    hasTeleStrengthTeleported = false
 end)
 
--- AUTO POOL
-local pools = {
-    Vector3.new(366,250,-446),
-    Vector3.new(348,264,-499),
-    Vector3.new(1639,260,2250),
-    Vector3.new(-2303,977,1072),
-    Vector3.new(-2051,714,-1893)
-}
-local poolBtns = {}
-local teleFrame = catFrames["Teleports"]
-
-for i=1,#pools do
-    local btn = Instance.new("TextButton", teleFrame)
+-- Strength Location Select Buttons
+local strengthLocationBtns = {}
+for i=1,#strengthLocations do
+    local btn = Instance.new("TextButton", farmsFrame)
     btn.Size = UDim2.new(0,50,0,26)
-    btn.Position = UDim2.new(0,10+(i-1)*60,0,10)
-    btn.Text = "Pool "..i
+    btn.Position = UDim2.new(0, 140+(i-1)*60, 0, 200)
+    btn.Text = "S"..i
     btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
     btn.TextColor3 = Color3.fromRGB(255,255,255)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
-    poolBtns[i] = btn
+    strengthLocationBtns[i] = btn
     btn.MouseButton1Click:Connect(function()
-        selectedPool = i
-        for j,b in ipairs(poolBtns) do
+        selectedStrength = i
+        for j,b in ipairs(strengthLocationBtns) do
             b.BackgroundColor3 = (j==i) and Color3.fromRGB(70,70,150) or Color3.fromRGB(70,70,70)
         end
     end)
 end
-
-local autoPoolBtn = Instance.new("TextButton", teleFrame)
-autoPoolBtn.Size = UDim2.new(0,120,0,28)
-autoPoolBtn.Position = UDim2.new(0,10,0,50)
-autoPoolBtn.Text = "Auto Pool: Off"
-autoPoolBtn.BackgroundColor3 = Color3.fromRGB(200,120,50)
-autoPoolBtn.TextColor3 = Color3.fromRGB(240,240,240)
-autoPoolBtn.Font = Enum.Font.GothamBold
-autoPoolBtn.TextSize = 14
-Instance.new("UICorner", autoPoolBtn).CornerRadius = UDim.new(0,8)
-autoPoolBtn.MouseButton1Click:Connect(function()
-    autoPool = not autoPool
-    autoPoolBtn.Text = autoPool and "Auto Pool: On" or "Auto Pool: Off"
-    hasTeleported = false
-end)
 
 -- CLICK LOOP
 task.spawn(function()
@@ -313,12 +297,41 @@ task.spawn(function()
                 momentorespawn=false
             end
         end
-        -- AUTO STRENGTH CLICK
-        if autoStrength then
-            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
-            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
-        end
         task.wait(0.4)
+    end
+end)
+
+-- AUTO STRENGTH LOOP
+task.spawn(function()
+    while true do
+        if autoStrength then
+            local char = Player.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                -- teleport to selected strength location
+                if not hasTeleStrengthTeleported then
+                    char.HumanoidRootPart.CFrame = CFrame.new(strengthLocations[selectedStrength])
+                    hasTeleStrengthTeleported = true
+                end
+                -- check if fist toggled
+                if not fistToggled then
+                    -- burada Fist’i takma eventini çalıştırıyoruz
+                    local args = {[1] = {[1] = "Add_FS_Request"}}
+                    game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
+                    fistToggled = true
+                end
+                -- sürekli tıklama
+                VirtualInputManager:SendMouseButtonEvent(
+                    clickPosition.X, clickPosition.Y,0,true,game,1
+                )
+                VirtualInputManager:SendMouseButtonEvent(
+                    clickPosition.X, clickPosition.Y,0,false,game,1
+                )
+            end
+        else
+            hasTeleStrengthTeleported = false
+            fistToggled = false
+        end
+        task.wait(0.1)
     end
 end)
 
@@ -331,22 +344,12 @@ local function setupDeathHandler()
             if hum then
                 hum.Died:Connect(function()
                     hasTeleported=false
+                    hasTeleStrengthTeleported=false
+                    fistToggled=false
                     task.wait(1)
                     Player.CharacterAdded:Wait()
                     task.wait(0.5)
                     doTeleport()
-                    -- 1,2,3 items auto-tak
-                    for i=1,3 do
-                        if itemsSelected[i] then
-                            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode[tostring(i)], false, game)
-                            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode[tostring(i)], false, game)
-                        end
-                    end
-                    -- AUTO STRENGTH
-                    if autoStrength then
-                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
-                        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
-                    end
                 end)
             end
         end
