@@ -4,6 +4,7 @@ local UserInputService = game:GetService("UserInputService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- STATE VARS
 local running = false
@@ -15,15 +16,9 @@ local clickPosition = Vector2.new(401, 270)
 local itemsSelected = {}
 local selectedPool = 1
 local momentorespawn = false
-
 local autoStrength = false
+local selectedStrengthStone = 1
 local hasTeleStrengthTeleported = false
-local strengthLocations = {
-    Vector3.new(403, 249, 988),  -- Normal Taş
-    Vector3.new(-2275, 1943, 1051) -- Mavi Kristal
-}
-local selectedStrength = 1
-local fistToggled = false
 
 -- GUI ROOT
 local gui = Instance.new("ScreenGui")
@@ -49,55 +44,6 @@ title.BackgroundTransparency = 1
 title.TextColor3 = Color3.fromRGB(230, 230, 230)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
-
--- SMALL TOGGLE BUTTON (hidden by default)
-local miniBtn = Instance.new("TextButton", gui)
-miniBtn.Size = UDim2.new(0, 40, 0, 40)
-miniBtn.Position = UDim2.new(0, 10, 0, 200)
-miniBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-miniBtn.Text = "☰"
-miniBtn.TextColor3 = Color3.fromRGB(230, 230, 230)
-miniBtn.Font = Enum.Font.GothamBold
-miniBtn.TextSize = 20
-miniBtn.Visible = false
-miniBtn.Active = true
-miniBtn.Draggable = true
-Instance.new("UICorner", miniBtn).CornerRadius = UDim.new(1, 0)
-
-miniBtn.MouseButton1Click:Connect(function()
-    panel.Visible = true
-    miniBtn.Visible = false
-end)
-
--- TOGGLE BUTTON
-local toggleBtn = Instance.new("TextButton", panel)
-toggleBtn.Size = UDim2.new(0, 50, 0, 50)
-toggleBtn.Position = UDim2.new(1, -60, 0, 2)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-toggleBtn.Text = "❌"
-toggleBtn.TextColor3 = Color3.fromRGB(230, 230, 230)
-toggleBtn.Font = Enum.Font.GothamBold
-toggleBtn.TextSize = 26
-Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(1, 0)
-
-toggleBtn.MouseButton1Click:Connect(function()
-    panel.Visible = false
-    miniBtn.Visible = true
-end)
-
--- Discord Button
-local discordBtn = Instance.new("TextButton", panel)
-discordBtn.Size = UDim2.new(0, 120, 0, 28)
-discordBtn.Position = UDim2.new(1, -130, 1, -38)
-discordBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 220)
-discordBtn.Text = "Discord"
-discordBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
-discordBtn.Font = Enum.Font.GothamBold
-discordBtn.TextSize = 14
-Instance.new("UICorner", discordBtn).CornerRadius = UDim.new(0, 8)
-discordBtn.MouseButton1Click:Connect(function()
-    if setclipboard then setclipboard("https://discord.gg/xwUDTAKFK5") end
-end)
 
 -- CATEGORY BUTTONS
 local categories = {"Teleports","Farms","Auto","Misc","Settings"}
@@ -146,107 +92,52 @@ clickerBtn.MouseButton1Click:Connect(function()
     clickerBtn.BackgroundColor3 = running and Color3.fromRGB(200,80,80) or Color3.fromRGB(40,180,100)
 end)
 
--- X/Y Position Inputs
-local xBox = Instance.new("TextBox", autoFrame)
-xBox.Size = UDim2.new(0, 60, 0, 26)
-xBox.Position = UDim2.new(0, 10, 0, 50)
-xBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
-xBox.Text = tostring(clickPosition.X)
-xBox.TextColor3 = Color3.fromRGB(220,220,220)
-xBox.Font = Enum.Font.Gotham
-xBox.TextSize = 14
-xBox.ClearTextOnFocus = false
-Instance.new("UICorner", xBox).CornerRadius = UDim.new(0,6)
-
-local yBox = Instance.new("TextBox", autoFrame)
-yBox.Size = UDim2.new(0, 60, 0, 26)
-yBox.Position = UDim2.new(0, 80, 0, 50)
-yBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
-yBox.Text = tostring(clickPosition.Y)
-yBox.TextColor3 = Color3.fromRGB(220,220,220)
-yBox.Font = Enum.Font.Gotham
-yBox.TextSize = 14
-yBox.ClearTextOnFocus = false
-Instance.new("UICorner", yBox).CornerRadius = UDim.new(0,6)
-
-local saveBtn = Instance.new("TextButton", autoFrame)
-saveBtn.Size = UDim2.new(0, 60, 0, 26)
-saveBtn.Position = UDim2.new(0, 150, 0, 50)
-saveBtn.BackgroundColor3 = Color3.fromRGB(80,80,200)
-saveBtn.Text = "Save"
-saveBtn.TextColor3 = Color3.fromRGB(240,240,240)
-saveBtn.Font = Enum.Font.GothamBold
-saveBtn.TextSize = 14
-Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0,6)
-
-saveBtn.MouseButton1Click:Connect(function()
-    local x = tonumber(xBox.Text)
-    local y = tonumber(yBox.Text)
-    if x and y then
-        clickPosition = Vector2.new(x,y)
-    end
-end)
-
--- FARMS (1,2,3 Items + Auto Strength)
+-- FARMS FRAME
 local farmsFrame = catFrames["Farms"]
-for i=1,3 do
-    local btn = Instance.new("TextButton", farmsFrame)
-    btn.Size = UDim2.new(0, 50, 0, 26)
-    btn.Position = UDim2.new(0, 10+(i-1)*60, 0, 10)
-    btn.Text = tostring(i)
-    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
 
-    btn.MouseButton1Click:Connect(function()
-        itemsSelected[i] = not itemsSelected[i]
-        if itemsSelected[i] then
-            btn.BackgroundColor3 = Color3.fromRGB(70,70,150)
-        else
-            btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-        end
-    end)
-end
+-- Strength Stones KORDINATLARI
+local strengthStones = {
+    Vector3.new(403,249,988), -- normal stone
+    Vector3.new(-2275,1943,1051) -- blue crystal
+}
 
--- AUTO STRENGTH BUTTONS
-local strengthBtn = Instance.new("TextButton", farmsFrame)
-strengthBtn.Size = UDim2.new(0,120,0,28)
-strengthBtn.Position = UDim2.new(0, 10, 0, 200)
-strengthBtn.Text = "Auto Strength: Off"
-strengthBtn.BackgroundColor3 = Color3.fromRGB(200,120,50)
-strengthBtn.TextColor3 = Color3.fromRGB(240,240,240)
-strengthBtn.Font = Enum.Font.GothamBold
-strengthBtn.TextSize = 14
-Instance.new("UICorner", strengthBtn).CornerRadius = UDim.new(0,8)
-
-strengthBtn.MouseButton1Click:Connect(function()
-    autoStrength = not autoStrength
-    strengthBtn.Text = autoStrength and "Auto Strength: On" or "Auto Strength: Off"
-    hasTeleStrengthTeleported = false
-end)
-
--- Strength Location Select Buttons
-local strengthLocationBtns = {}
-for i=1,#strengthLocations do
+-- Strength Stone Selection Buttons
+local strengthBtns = {}
+for i=1,#strengthStones do
     local btn = Instance.new("TextButton", farmsFrame)
     btn.Size = UDim2.new(0,50,0,26)
-    btn.Position = UDim2.new(0, 140+(i-1)*60, 0, 200)
-    btn.Text = "S"..i
-    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+    btn.Position = UDim2.new(0,10+(i-1)*60,0,10)
+    btn.Text = "Stone "..i
+    btn.BackgroundColor3 = (i==1) and Color3.fromRGB(70,70,150) or Color3.fromRGB(70,70,70)
     btn.TextColor3 = Color3.fromRGB(255,255,255)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
-    strengthLocationBtns[i] = btn
+    strengthBtns[i] = btn
     btn.MouseButton1Click:Connect(function()
-        selectedStrength = i
-        for j,b in ipairs(strengthLocationBtns) do
+        selectedStrengthStone = i
+        for j,b in ipairs(strengthBtns) do
             b.BackgroundColor3 = (j==i) and Color3.fromRGB(70,70,150) or Color3.fromRGB(70,70,70)
         end
     end)
 end
+
+-- Auto Strength Toggle
+local autoStrengthBtn = Instance.new("TextButton", farmsFrame)
+autoStrengthBtn.Size = UDim2.new(0,120,0,28)
+autoStrengthBtn.Position = UDim2.new(0,10,0,50)
+autoStrengthBtn.Text = "Auto Strength: Off"
+autoStrengthBtn.BackgroundColor3 = Color3.fromRGB(200,120,50)
+autoStrengthBtn.TextColor3 = Color3.fromRGB(240,240,240)
+autoStrengthBtn.Font = Enum.Font.GothamBold
+autoStrengthBtn.TextSize = 14
+Instance.new("UICorner", autoStrengthBtn).CornerRadius = UDim.new(0,8)
+
+autoStrengthBtn.MouseButton1Click:Connect(function()
+    autoStrength = not autoStrength
+    autoStrengthBtn.Text = autoStrength and "Auto Strength: On" or "Auto Strength: Off"
+    hasTeleStrengthTeleported = false
+end)
 
 -- CLICK LOOP
 task.spawn(function()
@@ -264,6 +155,51 @@ task.spawn(function()
 end)
 
 -- AUTO POOL LOOP
+local pools = {
+    Vector3.new(366,250,-446),
+    Vector3.new(348,264,-499),
+    Vector3.new(1639,260,2250),
+    Vector3.new(-2303,977,1072),
+    Vector3.new(-2051,714,-1893)
+}
+local teleFrame = catFrames["Teleports"]
+local poolBtns = {}
+
+for i=1,#pools do
+    local btn = Instance.new("TextButton", teleFrame)
+    btn.Size = UDim2.new(0,50,0,26)
+    btn.Position = UDim2.new(0,10+(i-1)*60,0,10)
+    btn.Text = "Pool "..i
+    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+    poolBtns[i] = btn
+    btn.MouseButton1Click:Connect(function()
+        selectedPool = i
+        for j,b in ipairs(poolBtns) do
+            b.BackgroundColor3 = (j==i) and Color3.fromRGB(70,70,150) or Color3.fromRGB(70,70,70)
+        end
+    end)
+end
+
+local autoPoolBtn = Instance.new("TextButton", teleFrame)
+autoPoolBtn.Size = UDim2.new(0,120,0,28)
+autoPoolBtn.Position = UDim2.new(0,10,0,50)
+autoPoolBtn.Text = "Auto Pool: Off"
+autoPoolBtn.BackgroundColor3 = Color3.fromRGB(200,120,50)
+autoPoolBtn.TextColor3 = Color3.fromRGB(240,240,240)
+autoPoolBtn.Font = Enum.Font.GothamBold
+autoPoolBtn.TextSize = 14
+Instance.new("UICorner", autoPoolBtn).CornerRadius = UDim.new(0,8)
+autoPoolBtn.MouseButton1Click:Connect(function()
+    autoPool = not autoPool
+    autoPoolBtn.Text = autoPool and "Auto Pool: On" or "Auto Pool: Off"
+    hasTeleported = false
+end)
+
+-- Teleport Functions
 local function doTeleport()
     local char = Player.Character
     if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
@@ -271,17 +207,33 @@ local function doTeleport()
         hasTeleported = true
     end
 end
+
+local function doStrengthTeleport()
+    local char = Player.Character
+    if char and char:FindFirstChild("HumanoidRootPart") and autoStrength then
+        char.HumanoidRootPart.CFrame = CFrame.new(strengthStones[selectedStrengthStone])
+        hasTeleStrengthTeleported = true
+    end
+end
+
 RunService.RenderStepped:Connect(function()
     local char = Player.Character
-    if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        -- Pool reset
         local pos = char.HumanoidRootPart.Position
         if lastPos and (pos-lastPos).Magnitude > 1 then hasTeleported = false end
         lastPos = pos
+        -- Strength reset
+        if lastPos and (pos-lastPos).Magnitude > 1 then hasTeleStrengthTeleported = false end
     end
 end)
+
+-- AUTO POOL + AUTO STRENGTH LOOP
 task.spawn(function()
     while true do
         if autoPool and not hasTeleported then doTeleport() end
+        if autoStrength and not hasTeleStrengthTeleported then doStrengthTeleport() end
+
         -- SPAWN BYPASS
         local char = Player.Character
         if char and char:FindFirstChild("Humanoid") then
@@ -292,46 +244,18 @@ task.spawn(function()
             if momentorespawn then
                 char:Remove()
                 task.wait(0.1)
-                game:GetService("ReplicatedStorage").RemoteEvent:FireServer({"Respawn"})
+                ReplicatedStorage.RemoteEvent:FireServer({"Respawn"})
                 task.wait(0.1)
                 momentorespawn=false
             end
         end
-        task.wait(0.4)
-    end
-end)
 
--- AUTO STRENGTH LOOP
-task.spawn(function()
-    while true do
+        -- AUTO STRENGTH CLICK
         if autoStrength then
-            local char = Player.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                -- teleport to selected strength location
-                if not hasTeleStrengthTeleported then
-                    char.HumanoidRootPart.CFrame = CFrame.new(strengthLocations[selectedStrength])
-                    hasTeleStrengthTeleported = true
-                end
-                -- check if fist toggled
-                if not fistToggled then
-                    -- burada Fist’i takma eventini çalıştırıyoruz
-                    local args = {[1] = {[1] = "Add_FS_Request"}}
-                    game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
-                    fistToggled = true
-                end
-                -- sürekli tıklama
-                VirtualInputManager:SendMouseButtonEvent(
-                    clickPosition.X, clickPosition.Y,0,true,game,1
-                )
-                VirtualInputManager:SendMouseButtonEvent(
-                    clickPosition.X, clickPosition.Y,0,false,game,1
-                )
-            end
-        else
-            hasTeleStrengthTeleported = false
-            fistToggled = false
+            ReplicatedStorage.RemoteEvent:FireServer({{"Add_FS_Request"}})
         end
-        task.wait(0.1)
+
+        task.wait(0.4)
     end
 end)
 
@@ -345,11 +269,11 @@ local function setupDeathHandler()
                 hum.Died:Connect(function()
                     hasTeleported=false
                     hasTeleStrengthTeleported=false
-                    fistToggled=false
                     task.wait(1)
                     Player.CharacterAdded:Wait()
                     task.wait(0.5)
                     doTeleport()
+                    doStrengthTeleport()
                 end)
             end
         end
