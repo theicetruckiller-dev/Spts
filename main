@@ -15,12 +15,7 @@ local clickPosition = Vector2.new(401, 270)
 local itemsSelected = {}
 local selectedPool = 1
 local momentorespawn = false
-local autoStrength = false
-local selectedStrength = 1 -- 1=normal, 2=blue crystal
-local strengthPositions = {
-    Vector3.new(403,249,988), -- normal stone
-    Vector3.new(-2275,1943,1051) -- blue crystal
-}
+local autoStrength = false -- Fist Strength otomatik
 
 -- GUI ROOT
 local gui = Instance.new("ScreenGui")
@@ -184,7 +179,7 @@ saveBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- FARMS (1,2,3 Items)
+-- FARMS (1,2,3 Items + AUTO STRENGTH)
 local farmsFrame = catFrames["Farms"]
 for i=1,3 do
     local btn = Instance.new("TextButton", farmsFrame)
@@ -207,6 +202,23 @@ for i=1,3 do
     end)
 end
 
+-- AUTO STRENGTH BUTTON
+local autoStrengthBtn = Instance.new("TextButton", farmsFrame)
+autoStrengthBtn.Size = UDim2.new(0, 120, 0, 28)
+autoStrengthBtn.Position = UDim2.new(0, 70, 0, 80)
+autoStrengthBtn.Text = "Auto Strength: Off"
+autoStrengthBtn.BackgroundColor3 = Color3.fromRGB(200,80,80)
+autoStrengthBtn.TextColor3 = Color3.fromRGB(255,255,255)
+autoStrengthBtn.Font = Enum.Font.GothamBold
+autoStrengthBtn.TextSize = 14
+Instance.new("UICorner", autoStrengthBtn).CornerRadius = UDim.new(0,6)
+
+autoStrengthBtn.MouseButton1Click:Connect(function()
+    autoStrength = not autoStrength
+    autoStrengthBtn.Text = autoStrength and "Auto Strength: On" or "Auto Strength: Off"
+    autoStrengthBtn.BackgroundColor3 = autoStrength and Color3.fromRGB(70,150,70) or Color3.fromRGB(200,80,80)
+end)
+
 -- AUTO POOL
 local pools = {
     Vector3.new(366,250,-446),
@@ -215,8 +227,8 @@ local pools = {
     Vector3.new(-2303,977,1072),
     Vector3.new(-2051,714,-1893)
 }
-local teleFrame = catFrames["Teleports"]
 local poolBtns = {}
+local teleFrame = catFrames["Teleports"]
 
 for i=1,#pools do
     local btn = Instance.new("TextButton", teleFrame)
@@ -252,27 +264,6 @@ autoPoolBtn.MouseButton1Click:Connect(function()
     hasTeleported = false
 end)
 
--- AUTO STRENGTH BUTTONS (Farms)
-local strengthBtns = {}
-for i=1,#strengthPositions do
-    local btn = Instance.new("TextButton", farmsFrame)
-    btn.Size = UDim2.new(0,120,0,28)
-    btn.Position = UDim2.new(0, 70, 0, 10 + (i-1)*32)
-    btn.Text = (i==1) and "Strength: Normal" or "Strength: Blue"
-    btn.BackgroundColor3 = (i==selectedStrength) and Color3.fromRGB(70,70,150) or Color3.fromRGB(70,70,70)
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
-    strengthBtns[i] = btn
-    btn.MouseButton1Click:Connect(function()
-        selectedStrength = i
-        for j,b in ipairs(strengthBtns) do
-            b.BackgroundColor3 = (j==i) and Color3.fromRGB(70,70,150) or Color3.fromRGB(70,70,70)
-        end
-    end)
-end
-
 -- CLICK LOOP
 task.spawn(function()
     while true do
@@ -288,22 +279,17 @@ task.spawn(function()
     end
 end)
 
--- AUTO POOL & AUTO STRENGTH LOOP
+-- AUTO POOL LOOP
 local function doTeleport()
     local char = Player.Character
-    if char and char:FindFirstChild("HumanoidRootPart") then
-        if autoPool then
-            char.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
-            hasTeleported = true
-        end
-        if autoStrength then
-            char.HumanoidRootPart.CFrame = CFrame.new(strengthPositions[selectedStrength])
-        end
+    if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
+        char.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
+        hasTeleported = true
     end
 end
 RunService.RenderStepped:Connect(function()
     local char = Player.Character
-    if char and char:FindFirstChild("HumanoidRootPart") then
+    if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
         local pos = char.HumanoidRootPart.Position
         if lastPos and (pos-lastPos).Magnitude > 1 then hasTeleported = false end
         lastPos = pos
@@ -311,7 +297,7 @@ RunService.RenderStepped:Connect(function()
 end)
 task.spawn(function()
     while true do
-        doTeleport()
+        if autoPool and not hasTeleported then doTeleport() end
         -- SPAWN BYPASS
         local char = Player.Character
         if char and char:FindFirstChild("Humanoid") then
@@ -327,11 +313,10 @@ task.spawn(function()
                 momentorespawn=false
             end
         end
-        -- AUTO STRENGTH KEY PRESS
+        -- AUTO STRENGTH CLICK
         if autoStrength then
-            local key = (selectedStrength==1) and Enum.KeyCode["1"] or Enum.KeyCode["3"]
-            VirtualInputManager:SendKeyEvent(true, key, false, game)
-            VirtualInputManager:SendKeyEvent(false, key, false, game)
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
         end
         task.wait(0.4)
     end
@@ -356,6 +341,11 @@ local function setupDeathHandler()
                             VirtualInputManager:SendKeyEvent(true, Enum.KeyCode[tostring(i)], false, game)
                             VirtualInputManager:SendKeyEvent(false, Enum.KeyCode[tostring(i)], false, game)
                         end
+                    end
+                    -- AUTO STRENGTH
+                    if autoStrength then
+                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
+                        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
                     end
                 end)
             end
