@@ -14,6 +14,7 @@ local lastPos = nil
 local clickPosition = Vector2.new(401, 270)
 local itemsSelected = {}
 local selectedPool = 1
+local momentorespawn = false
 
 -- GUI ROOT
 local gui = Instance.new("ScreenGui")
@@ -194,8 +195,6 @@ for i=1,3 do
         itemsSelected[i] = not itemsSelected[i]
         if itemsSelected[i] then
             btn.BackgroundColor3 = Color3.fromRGB(70,70,150)
-            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode[tostring(i)], false, game)
-            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode[tostring(i)], false, game)
         else
             btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
         end
@@ -281,6 +280,21 @@ end)
 task.spawn(function()
     while true do
         if autoPool and not hasTeleported then doTeleport() end
+        -- SPAWN BYPASS
+        local char = Player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            local hum = char.Humanoid
+            local c = math.floor(hum.Health)
+            local d = math.floor(hum.MaxHealth)*60/100
+            if c<=d then momentorespawn=true end
+            if momentorespawn then
+                char:Remove()
+                task.wait(0.1)
+                game:GetService("ReplicatedStorage").RemoteEvent:FireServer({"Respawn"})
+                task.wait(0.1)
+                momentorespawn=false
+            end
+        end
         task.wait(0.4)
     end
 end)
@@ -298,6 +312,13 @@ local function setupDeathHandler()
                     Player.CharacterAdded:Wait()
                     task.wait(0.5)
                     doTeleport()
+                    -- 1,2,3 items auto-tak
+                    for i=1,3 do
+                        if itemsSelected[i] then
+                            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode[tostring(i)], false, game)
+                            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode[tostring(i)], false, game)
+                        end
+                    end
                 end)
             end
         end
