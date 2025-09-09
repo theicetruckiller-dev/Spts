@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
@@ -23,6 +22,15 @@ local strengthLocations = {
     Vector3.new(-2275, 1943, 1051) -- Mavi Kristal
 }
 local selectedStrength = 1
+local fistToggled = false
+
+local pools = {
+    Vector3.new(366,250,-446),
+    Vector3.new(348,264,-499),
+    Vector3.new(1639,260,2250),
+    Vector3.new(-2303,977,1072),
+    Vector3.new(-2051,714,-1893)
+}
 
 -- GUI ROOT
 local gui = Instance.new("ScreenGui")
@@ -145,48 +153,23 @@ clickerBtn.MouseButton1Click:Connect(function()
     clickerBtn.BackgroundColor3 = running and Color3.fromRGB(200,80,80) or Color3.fromRGB(40,180,100)
 end)
 
--- X/Y Position Inputs
-local xBox = Instance.new("TextBox", autoFrame)
-xBox.Size = UDim2.new(0, 60, 0, 26)
-xBox.Position = UDim2.new(0, 10, 0, 50)
-xBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
-xBox.Text = tostring(clickPosition.X)
-xBox.TextColor3 = Color3.fromRGB(220,220,220)
-xBox.Font = Enum.Font.Gotham
-xBox.TextSize = 14
-xBox.ClearTextOnFocus = false
-Instance.new("UICorner", xBox).CornerRadius = UDim.new(0,6)
+-- Infinite Jump Button
+local infJumpBtn = Instance.new("TextButton", autoFrame)
+infJumpBtn.Size = UDim2.new(0,120,0,32)
+infJumpBtn.Position = UDim2.new(0, 140, 0, 10)
+infJumpBtn.BackgroundColor3 = Color3.fromRGB(150,150,50)
+infJumpBtn.Text = "Infinite Jump: Off"
+infJumpBtn.TextColor3 = Color3.fromRGB(240,240,240)
+infJumpBtn.Font = Enum.Font.GothamBold
+infJumpBtn.TextSize = 14
+Instance.new("UICorner", infJumpBtn).CornerRadius = UDim.new(0,8)
 
-local yBox = Instance.new("TextBox", autoFrame)
-yBox.Size = UDim2.new(0, 60, 0, 26)
-yBox.Position = UDim2.new(0, 80, 0, 50)
-yBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
-yBox.Text = tostring(clickPosition.Y)
-yBox.TextColor3 = Color3.fromRGB(220,220,220)
-yBox.Font = Enum.Font.Gotham
-yBox.TextSize = 14
-yBox.ClearTextOnFocus = false
-Instance.new("UICorner", yBox).CornerRadius = UDim.new(0,6)
-
-local saveBtn = Instance.new("TextButton", autoFrame)
-saveBtn.Size = UDim2.new(0, 60, 0, 26)
-saveBtn.Position = UDim2.new(0, 150, 0, 50)
-saveBtn.BackgroundColor3 = Color3.fromRGB(80,80,200)
-saveBtn.Text = "Save"
-saveBtn.TextColor3 = Color3.fromRGB(240,240,240)
-saveBtn.Font = Enum.Font.GothamBold
-saveBtn.TextSize = 14
-Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0,6)
-
-saveBtn.MouseButton1Click:Connect(function()
-    local x = tonumber(xBox.Text)
-    local y = tonumber(yBox.Text)
-    if x and y then
-        clickPosition = Vector2.new(x,y)
-    end
+infJumpBtn.MouseButton1Click:Connect(function()
+    infiniteJump = not infiniteJump
+    infJumpBtn.Text = infiniteJump and "Infinite Jump: On" or "Infinite Jump: Off"
 end)
 
--- FARMS (1,2,3 Items + Auto Strength)
+-- FARMS (1,2,3 Items + Auto Strength + Auto Pool)
 local farmsFrame = catFrames["Farms"]
 for i=1,3 do
     local btn = Instance.new("TextButton", farmsFrame)
@@ -209,7 +192,7 @@ for i=1,3 do
     end)
 end
 
--- AUTO STRENGTH BUTTON
+-- AUTO STRENGTH BUTTONS
 local strengthBtn = Instance.new("TextButton", farmsFrame)
 strengthBtn.Size = UDim2.new(0,120,0,28)
 strengthBtn.Position = UDim2.new(0, 10, 0, 200)
@@ -226,7 +209,6 @@ strengthBtn.MouseButton1Click:Connect(function()
     hasTeleStrengthTeleported = false
 end)
 
--- Strength Location Select Buttons
 local strengthLocationBtns = {}
 for i=1,#strengthLocations do
     local btn = Instance.new("TextButton", farmsFrame)
@@ -247,56 +229,53 @@ for i=1,#strengthLocations do
     end)
 end
 
+-- AUTO POOL BUTTON
+local poolBtn = Instance.new("TextButton", farmsFrame)
+poolBtn.Size = UDim2.new(0,120,0,28)
+poolBtn.Position = UDim2.new(0, 10, 0, 240)
+poolBtn.Text = "Auto Pool: Off"
+poolBtn.BackgroundColor3 = Color3.fromRGB(200,120,50)
+poolBtn.TextColor3 = Color3.fromRGB(240,240,240)
+poolBtn.Font = Enum.Font.GothamBold
+poolBtn.TextSize = 14
+Instance.new("UICorner", poolBtn).CornerRadius = UDim.new(0,8)
+
+poolBtn.MouseButton1Click:Connect(function()
+    autoPool = not autoPool
+    poolBtn.Text = autoPool and "Auto Pool: On" or "Auto Pool: Off"
+    hasTeleported = false
+end)
+
+-- Pool Select Buttons
+local poolBtns = {}
+local teleFrame = farmsFrame
+for i=1,#pools do
+    local btn = Instance.new("TextButton", teleFrame)
+    btn.Size = UDim2.new(0,50,0,26)
+    btn.Position = UDim2.new(0, 140+(i-1)*60, 0, 240)
+    btn.Text = "P"..i
+    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+    poolBtns[i] = btn
+    btn.MouseButton1Click:Connect(function()
+        selectedPool = i
+        for j,b in ipairs(poolBtns) do
+            b.BackgroundColor3 = (j==i) and Color3.fromRGB(70,70,150) or Color3.fromRGB(70,70,70)
+        end
+    end)
+end
+
 -- CLICK LOOP
 task.spawn(function()
     while true do
         if running and clickPosition then
-            VirtualInputManager:SendMouseButtonEvent(
-                clickPosition.X, clickPosition.Y,0,true,game,1
-            )
-            VirtualInputManager:SendMouseButtonEvent(
-                clickPosition.X, clickPosition.Y,0,false,game,1
-            )
+            VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,true,game,1)
+            VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,false,game,1)
         end
         task.wait(0.05)
-    end
-end)
-
--- AUTO POOL LOOP
-local function doTeleport()
-    local char = Player.Character
-    if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
-        char.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
-        hasTeleported = true
-    end
-end
-RunService.RenderStepped:Connect(function()
-    local char = Player.Character
-    if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
-        local pos = char.HumanoidRootPart.Position
-        if lastPos and (pos-lastPos).Magnitude > 1 then hasTeleported = false end
-        lastPos = pos
-    end
-end)
-task.spawn(function()
-    while true do
-        if autoPool and not hasTeleported then doTeleport() end
-        -- SPAWN BYPASS
-        local char = Player.Character
-        if char and char:FindFirstChild("Humanoid") then
-            local hum = char.Humanoid
-            local c = math.floor(hum.Health)
-            local d = math.floor(hum.MaxHealth)*60/100
-            if c<=d then momentorespawn=true end
-            if momentorespawn then
-                char:Remove()
-                task.wait(0.1)
-                game:GetService("ReplicatedStorage").RemoteEvent:FireServer({"Respawn"})
-                task.wait(0.1)
-                momentorespawn=false
-            end
-        end
-        task.wait(0.4)
     end
 end)
 
@@ -306,32 +285,51 @@ task.spawn(function()
         if autoStrength then
             local char = Player.Character
             if char and char:FindFirstChild("HumanoidRootPart") then
-                local hrp = char.HumanoidRootPart
-                local pos = hrp.Position
-
-                -- teleport mantığı: taşlara dön
-                local targetPos = strengthLocations[selectedStrength]
-                if not hasTeleStrengthTeleported or (pos - targetPos).Magnitude > 5 then
-                    hrp.CFrame = CFrame.new(targetPos)
+                if not hasTeleStrengthTeleported then
+                    char.HumanoidRootPart.CFrame = CFrame.new(strengthLocations[selectedStrength])
                     hasTeleStrengthTeleported = true
                 end
-
-                -- sürekli Fist Strength al
-                local args = {[1] = {[1] = "Add_FS_Request"}}
-                game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
-
-                -- sürekli click
-                VirtualInputManager:SendMouseButtonEvent(
-                    clickPosition.X, clickPosition.Y,0,true,game,1
-                )
-                VirtualInputManager:SendMouseButtonEvent(
-                    clickPosition.X, clickPosition.Y,0,false,game,1
-                )
+                if not fistToggled then
+                    game:GetService("ReplicatedStorage").RemoteEvent:FireServer({[1] = {[1] = "Add_FS_Request"}})
+                    fistToggled = true
+                end
+                VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,true,game,1)
+                VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,false,game,1)
             end
         else
             hasTeleStrengthTeleported = false
+            fistToggled = false
         end
         task.wait(0.1)
+    end
+end)
+
+-- AUTO POOL LOOP
+task.spawn(function()
+    while true do
+        if autoPool then
+            local char = Player.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                if not hasTeleported then
+                    char.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
+                    hasTeleported = true
+                end
+                local pos = char.HumanoidRootPart.Position
+                if lastPos and (pos-lastPos).Magnitude > 1 then hasTeleported = false end
+                lastPos = pos
+            end
+        end
+        task.wait(0.2)
+    end
+end)
+
+-- INFINITE JUMP
+UserInputService.JumpRequest:Connect(function()
+    if infiniteJump then
+        local char = Player.Character
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
     end
 end)
 
@@ -345,10 +343,17 @@ local function setupDeathHandler()
                 hum.Died:Connect(function()
                     hasTeleported=false
                     hasTeleStrengthTeleported=false
+                    fistToggled=false
                     task.wait(1)
                     Player.CharacterAdded:Wait()
                     task.wait(0.5)
-                    doTeleport()
+                    if autoPool and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                        Player.Character.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
+                    end
+                    if autoStrength and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                        Player.Character.HumanoidRootPart.CFrame = CFrame.new(strengthLocations[selectedStrength])
+                        game:GetService("ReplicatedStorage").RemoteEvent:FireServer({[1] = {[1] = "Add_FS_Request"}})
+                    end
                 end)
             end
         end
