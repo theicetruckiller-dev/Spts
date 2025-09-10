@@ -215,7 +215,7 @@ end
 -- AUTO STRENGTH
 local strengthBtn = Instance.new("TextButton", farmsFrame)
 strengthBtn.Size = UDim2.new(0,120,0,28)
-strengthBtn.Position = UDim2.new(0, 10, 0, 200)
+strengthBtn.Position = UDim2.new(0,10,0,200)
 strengthBtn.Text = "Auto Strength: Off"
 strengthBtn.BackgroundColor3 = Color3.fromRGB(200,120,50)
 strengthBtn.TextColor3 = Color3.fromRGB(240,240,240)
@@ -227,6 +227,46 @@ strengthBtn.MouseButton1Click:Connect(function()
     strengthBtn.Text = autoStrength and "Auto Strength: On" or "Auto Strength: Off"
     hasTeleStrengthTeleported = false
 end)
+
+-- AUTO STRENGTH SELECT
+local strengthSelectBtn = Instance.new("TextButton", farmsFrame)
+strengthSelectBtn.Size = UDim2.new(0,120,0,28)
+strengthSelectBtn.Position = UDim2.new(0,140,0,200)
+strengthSelectBtn.Text = "Select Strength"
+strengthSelectBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
+strengthSelectBtn.TextColor3 = Color3.fromRGB(240,240,240)
+strengthSelectBtn.Font = Enum.Font.GothamBold
+strengthSelectBtn.TextSize = 14
+Instance.new("UICorner", strengthSelectBtn).CornerRadius = UDim.new(0,8)
+
+local strengthFrame = Instance.new("Frame", farmsFrame)
+strengthFrame.Size = UDim2.new(0,120,0,0)
+strengthFrame.Position = UDim2.new(0,140,0,228)
+strengthFrame.BackgroundColor3 = Color3.fromRGB(60,60,60)
+strengthFrame.Visible = false
+Instance.new("UICorner", strengthFrame).CornerRadius = UDim.new(0,6)
+
+strengthSelectBtn.MouseButton1Click:Connect(function()
+    strengthFrame.Visible = not strengthFrame.Visible
+end)
+
+local yOff2 = 0
+for i,pos in ipairs(strengthLocations) do
+    local btn = Instance.new("TextButton", strengthFrame)
+    btn.Size = UDim2.new(1,0,0,28)
+    btn.Position = UDim2.new(0,0,0,yOff2)
+    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+    btn.Text = i..". Strength"
+    btn.TextColor3 = Color3.fromRGB(240,240,240)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+    btn.MouseButton1Click:Connect(function()
+        selectedStrength = i
+        strengthFrame.Visible = false
+    end)
+    yOff2 = yOff2 + 30
+end
 
 -- INFINITE JUMP
 UserInputService.JumpRequest:Connect(function()
