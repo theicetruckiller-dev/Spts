@@ -9,14 +9,17 @@ local PlayerGui = Player:WaitForChild("PlayerGui")
 local running = false
 local infiniteJump = true
 local autoPool = false
+local autoStrength = false
+local autoPsychic = false
 local hasTeleported = false
+local hasTeleStrengthTeleported = false
+local hasTelePsychic = false
 local lastPos = nil
 local clickPosition = Vector2.new(401, 270)
 local selectedPool = "1. 100"
 local momentorespawn = false
-local autoStrength = false
-local hasTeleStrengthTeleported = false
 local selectedStrength = Vector3.new(403, 249, 988)
+local psychicPos = Vector3.new(-2531, 5486, -533)
 
 -- TELEPORT LOCATIONS
 local teleportLocations = {
@@ -163,7 +166,7 @@ end
 -- FARMS FRAME
 local farmsFrame = catFrames["Farms"]
 
--- Auto Pool Button
+-- AUTO POOL
 local poolBtn = Instance.new("TextButton", farmsFrame)
 poolBtn.Size = UDim2.new(0,120,0,28)
 poolBtn.Position = UDim2.new(0,10,0,10)
@@ -219,7 +222,7 @@ for name,_ in pairs(pools) do
     yOff = yOff + 30
 end
 
--- Auto Strength Button
+-- AUTO STRENGTH
 local strengthBtn = Instance.new("TextButton", farmsFrame)
 strengthBtn.Size = UDim2.new(0,120,0,28)
 strengthBtn.Position = UDim2.new(0,10,0,200)
@@ -235,7 +238,6 @@ strengthBtn.MouseButton1Click:Connect(function()
     hasTeleStrengthTeleported = false
 end)
 
--- Strength Selection
 local sY = 240
 for name,vec in pairs(strengthLocations) do
     local btn = Instance.new("TextButton", farmsFrame)
@@ -253,11 +255,27 @@ for name,vec in pairs(strengthLocations) do
             if b:IsA("TextButton") and b.TextColor3 ~= Color3.fromRGB(240,240,240) then
                 b.BackgroundColor3 = Color3.fromRGB(70,70,70)
             end
-end
+        end
         btn.BackgroundColor3 = Color3.fromRGB(70,70,150)
     end)
     sY = sY + 36
 end
+
+-- AUTO PSYCHIC
+local psychicBtn = Instance.new("TextButton", farmsFrame)
+psychicBtn.Size = UDim2.new(0,120,0,28)
+psychicBtn.Position = UDim2.new(0,280,0,10)
+psychicBtn.Text = "Auto Psychic: Off"
+psychicBtn.BackgroundColor3 = Color3.fromRGB(150,50,200)
+psychicBtn.TextColor3 = Color3.fromRGB(240,240,240)
+psychicBtn.Font = Enum.Font.GothamBold
+psychicBtn.TextSize = 14
+Instance.new("UICorner", psychicBtn).CornerRadius = UDim.new(0,8)
+psychicBtn.MouseButton1Click:Connect(function()
+    autoPsychic = not autoPsychic
+    psychicBtn.Text = autoPsychic and "Auto Psychic: On" or "Auto Psychic: Off"
+    hasTelePsychic = false
+end)
 
 -- CLICK LOOP
 task.spawn(function()
@@ -280,7 +298,7 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- AUTO POOL LOOP
+-- TELEPORT FUNCTIONS
 local function doTeleport()
     local char = Player.Character
     if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
@@ -289,11 +307,42 @@ local function doTeleport()
     end
 end
 
+local function doStrengthTeleport()
+    local char = Player.Character
+    if char and char:FindFirstChild("HumanoidRootPart") and autoStrength then
+        char.HumanoidRootPart.CFrame = CFrame.new(selectedStrength)
+        hasTeleStrengthTeleported = true
+        local args = {[1] = {[1] = "Add_FS_Request"}}
+        game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
+        VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,true,game,1)
+        VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,false,game,1)
+    end
+end
+
+local function doPsychicTeleport()
+    local char = Player.Character
+    if char and char:FindFirstChild("HumanoidRootPart") and autoPsychic then
+        char.HumanoidRootPart.CFrame = CFrame.new(psychicPos)
+        hasTelePsychic = true
+        local args = {
+            [1] = {
+                [1] = "Meditation_Request",
+                [2] = true
+            }
+        }
+        game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
+    end
+end
+
 RunService.RenderStepped:Connect(function()
     local char = Player.Character
-    if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
+    if char and char:FindFirstChild("HumanoidRootPart") then
         local pos = char.HumanoidRootPart.Position
-        if lastPos and (pos-lastPos).Magnitude > 1 then hasTeleported = false end
+        if lastPos and (pos-lastPos).Magnitude > 1 then
+            hasTeleported = false
+            hasTeleStrengthTeleported = false
+            hasTelePsychic = false
+        end
         lastPos = pos
     end
 end)
@@ -301,6 +350,9 @@ end)
 task.spawn(function()
     while true do
         if autoPool and not hasTeleported then doTeleport() end
+        if autoStrength and not hasTeleStrengthTeleported then doStrengthTeleport() end
+        if autoPsychic and not hasTelePsychic then doPsychicTeleport() end
+
         -- SPAWN BYPASS
         local char = Player.Character
         if char and char:FindFirstChild("Humanoid") then
@@ -314,26 +366,8 @@ task.spawn(function()
                 momentorespawn = false
             end
         end
-        task.wait(0.4)
-    end
-end)
 
--- AUTO STRENGTH LOOP
-task.spawn(function()
-    while true do
-        if autoStrength and selectedStrength then
-            local char = Player.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.CFrame = CFrame.new(selectedStrength)
-                local args = {[1] = {[1] = "Add_FS_Request"}}
-                game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
-                VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,true,game,1)
-                VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,false,game,1)
-            end
-        else
-            hasTeleStrengthTeleported = false
-        end
-        task.wait(0.1)
+        task.wait(0.4)
     end
 end)
 
@@ -347,10 +381,13 @@ local function setupDeathHandler()
                 hum.Died:Connect(function()
                     hasTeleported=false
                     hasTeleStrengthTeleported=false
+                    hasTelePsychic=false
                     task.wait(1)
                     Player.CharacterAdded:Wait()
                     task.wait(0.5)
                     doTeleport()
+                    doStrengthTeleport()
+                    doPsychicTeleport()
                 end)
             end
         end
