@@ -40,11 +40,11 @@ local pools = {
 
 -- STRENGTH LOCATIONS
 local strengthLocations = {
-    ["Normal Taş"] = Vector3.new(403, 249, 988),
+    ["Normal TaÅŸ"] = Vector3.new(403, 249, 988),
     ["Mavi Kristal"] = Vector3.new(-2275, 1943, 1051)
 }
 
--- PSYCHIC LOCATIONS
+-- PSYCHIC POSITIONS (for selection only)
 local psychicLocations = {
     ["1M"] = Vector3.new(-2531, 5486, -533),
     ["1B"] = Vector3.new(-2562, 5501, -435),
@@ -69,7 +69,7 @@ Instance.new("UICorner", panel).CornerRadius = UDim.new(0,12)
 
 -- TITLE
 local title = Instance.new("TextLabel", panel)
-title.Text = "⚡ SPTS Auto (By Zwac)"
+title.Text = "âš¡ SPTS Auto (By Zwac)"
 title.Size = UDim2.new(1,0,0,28)
 title.Position = UDim2.new(0,0,0,2)
 title.BackgroundTransparency = 1
@@ -82,7 +82,7 @@ local miniBtn = Instance.new("TextButton", gui)
 miniBtn.Size = UDim2.new(0,40,0,40)
 miniBtn.Position = UDim2.new(0,10,0,200)
 miniBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-miniBtn.Text = "☰"
+miniBtn.Text = "â˜°"
 miniBtn.TextColor3 = Color3.fromRGB(230,230,230)
 miniBtn.Font = Enum.Font.GothamBold
 miniBtn.TextSize = 20
@@ -100,7 +100,7 @@ local toggleBtn = Instance.new("TextButton", panel)
 toggleBtn.Size = UDim2.new(0,50,0,50)
 toggleBtn.Position = UDim2.new(1,-60,0,2)
 toggleBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-toggleBtn.Text = "❌"
+toggleBtn.Text = "âŒ"
 toggleBtn.TextColor3 = Color3.fromRGB(230,230,230)
 toggleBtn.Font = Enum.Font.GothamBold
 toggleBtn.TextSize = 26
@@ -176,7 +176,7 @@ end
 -- FARMS FRAME
 local farmsFrame = catFrames["Farms"]
 
--- Auto Pool
+-- Auto Pool Button
 local poolBtn = Instance.new("TextButton", farmsFrame)
 poolBtn.Size = UDim2.new(0,120,0,28)
 poolBtn.Position = UDim2.new(0,10,0,10)
@@ -232,7 +232,7 @@ for name,_ in pairs(pools) do
     yOff = yOff + 30
 end
 
--- Auto Strength
+-- Auto Strength Button
 local strengthBtn = Instance.new("TextButton", farmsFrame)
 strengthBtn.Size = UDim2.new(0,120,0,28)
 strengthBtn.Position = UDim2.new(0,10,0,200)
@@ -272,10 +272,10 @@ for name,vec in pairs(strengthLocations) do
     sY = sY + 36
 end
 
--- Auto Psychic
+-- Auto Psychic Button
 local psychicBtn = Instance.new("TextButton", farmsFrame)
 psychicBtn.Size = UDim2.new(0,120,0,28)
-psychicBtn.Position = UDim2.new(0,140,0,240)
+psychicBtn.Position = UDim2.new(0,140,0,200)
 psychicBtn.Text = "Auto Psychic: Off"
 psychicBtn.BackgroundColor3 = Color3.fromRGB(180,50,180)
 psychicBtn.TextColor3 = Color3.fromRGB(240,240,240)
@@ -290,7 +290,7 @@ end)
 -- Psychic Selection
 local psychicSelectBtn = Instance.new("TextButton", farmsFrame)
 psychicSelectBtn.Size = UDim2.new(0,120,0,28)
-psychicSelectBtn.Position = UDim2.new(0,270,0,240)
+psychicSelectBtn.Position = UDim2.new(0,270,0,200)
 psychicSelectBtn.Text = "Select Psychic"
 psychicSelectBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
 psychicSelectBtn.TextColor3 = Color3.fromRGB(240,240,240)
@@ -300,7 +300,7 @@ Instance.new("UICorner", psychicSelectBtn).CornerRadius = UDim.new(0,8)
 
 local psychicFrame = Instance.new("Frame", farmsFrame)
 psychicFrame.Size = UDim2.new(0,120,0,0)
-psychicFrame.Position = UDim2.new(0,270,0,268)
+psychicFrame.Position = UDim2.new(0,270,0,228)
 psychicFrame.BackgroundColor3 = Color3.fromRGB(60,60,60)
 psychicFrame.Visible = false
 Instance.new("UICorner", psychicFrame).CornerRadius = UDim.new(0,6)
@@ -327,84 +327,150 @@ for name,_ in pairs(psychicLocations) do
     pyOff = pyOff + 30
 end
 
--- AUTO FRAME
-local autoFrame = catFrames["Auto"]
-
--- Infinite Jump
-local jumpBtn = Instance.new("TextButton", autoFrame)
-jumpBtn.Size = UDim2.new(0,150,0,28)
-jumpBtn.Position = UDim2.new(0,10,0,10)
-jumpBtn.Text = "Infinite Jump: On"
-jumpBtn.BackgroundColor3 = Color3.fromRGB(50,180,100)
-jumpBtn.TextColor3 = Color3.fromRGB(240,240,240)
-jumpBtn.Font = Enum.Font.GothamBold
-jumpBtn.TextSize = 14
-Instance.new("UICorner", jumpBtn).CornerRadius = UDim.new(0,8)
-jumpBtn.MouseButton1Click:Connect(function()
-    infiniteJump = not infiniteJump
-    jumpBtn.Text = infiniteJump and "Infinite Jump: On" or "Infinite Jump: Off"
+-- CLICK LOOP
+task.spawn(function()
+    while true do
+        if running and clickPosition then
+            VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,true,game,1)
+            VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,false,game,1)
+        end
+        task.wait(0.05)
+    end
 end)
 
--- LOOP
+-- INFINITE JUMP
+UserInputService.JumpRequest:Connect(function()
+    if infiniteJump then
+        local char = Player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+-- AUTO POOL LOOP
+local function doTeleport()
+    local char = Player.Character
+    if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
+        char.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
+        hasTeleported = true
+    end
+end
+
 RunService.RenderStepped:Connect(function()
     local char = Player.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = char.HumanoidRootPart
+    if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
+        local pos = char.HumanoidRootPart.Position
+        if lastPos and (pos-lastPos).Magnitude > 1 then hasTeleported = false end
+        lastPos = pos
+    end
+end)
 
-    -- Auto Pool
-    if autoPool then
-        local pos = pools[selectedPool]
-        if pos then
-            if not hasTeleported or (momentorespawn and (not lastPos or (hrp.Position - lastPos).Magnitude > 50)) then
-                hrp.CFrame = CFrame.new(pos)
-                hasTeleported = true
-                momentorespawn = false
+-- AUTO STRENGTH LOOP
+task.spawn(function()
+    while true do
+        if autoStrength and selectedStrength then
+            local char = Player.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.CFrame = CFrame.new(selectedStrength)
+                local args = {[1] = {[1] = "Add_FS_Request"}}
+                ReplicatedStorage.RemoteEvent:FireServer(unpack(args))
+                VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,true,game,1)
+                VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,false,game,1)
+            end
+        else
+            hasTeleStrengthTeleported = false
+        end
+        task.wait(0.1)
+    end
+end)
+
+-- AUTO PSYCHIC LOOP
+task.spawn(function()
+    while true do
+        if autoPsychic then
+            local char = Player.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local args = {
+                    [1] = {
+                        [1] = "Meditation_Request",
+                        [2] = true
+                    }
+                }
+                ReplicatedStorage.RemoteEvent:FireServer(unpack(args))
+            end
+        end
+        task.wait(0.5)
+    end
+end)
+
+-- SPAWN / DEATH HANDLER
+local function setupDeathHandler()
+    local function connectDied()
+        local char = Player.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.Died:Connect(function()
+                    -- Reset teleports
+                    hasTeleported = false
+                    hasTeleStrengthTeleported = false
+
+                    -- Wait for respawn
+                    task.wait(1)
+                    Player.CharacterAdded:Wait()
+                    task.wait(0.5)
+
+                    -- Teleport to Auto Pool if enabled
+                    doTeleport()
+
+                    -- Teleport to Auto Strength if enabled
+                    if autoStrength and selectedStrength then
+                        local char2 = Player.Character
+                        if char2 and char2:FindFirstChild("HumanoidRootPart") then
+                            char2.HumanoidRootPart.CFrame = CFrame.new(selectedStrength)
+                        end
+                    end
+
+                    -- Auto Psychic will automatically fire from loop
+                end)
             end
         end
     end
 
-    -- Auto Strength
-    if autoStrength then
-        if not hasTeleStrengthTeleported or (momentorespawn and (not lastPos or (hrp.Position - lastPos).Magnitude > 50)) then
-            hrp.CFrame = CFrame.new(selectedStrength)
-            hasTeleStrengthTeleported = true
-            momentorespawn = false
-        end
-        -- Click simulation
-        VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y, 0, true, game, 1)
-        VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y, 0, false, game, 1)
-    end
+    Player.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        connectDied()
+    end)
 
-    -- Auto Psychic
-    if autoPsychic then
-        local pos = psychicLocations[selectedPsychic]
-        if pos then
-            if not momentorespawn or (not lastPos or (hrp.Position - lastPos).Magnitude > 50) then
-                hrp.CFrame = CFrame.new(pos)
+    connectDied()
+end
+
+setupDeathHandler()
+
+-- AUTO POOL & RESPAWN BYPASS LOOP
+task.spawn(function()
+    while true do
+        local char = Player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            local hum = char.Humanoid
+            if hum.Health <= hum.MaxHealth * 0.6 then
+                momentorespawn = true
+            end
+            if momentorespawn then
+                char:Remove()
+                task.wait(0.1)
+                ReplicatedStorage.RemoteEvent:FireServer({"Respawn"})
+                task.wait(0.1)
                 momentorespawn = false
             end
         end
-        -- Item takma
-        local args = {
-            [1] = {
-                [1] = "Meditation_Request",
-                [2] = true
-            }
-        }
-        ReplicatedStorage.RemoteEvent:FireServer(unpack(args))
-    end
-end)
 
--- Infinite Jump Loop
-UserInputService.JumpRequest:Connect(function()
-    if infiniteJump and Player.Character and Player.Character:FindFirstChildOfClass("Humanoid") then
-        Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-    end
-end)
+        -- Auto Pool Teleport
+        if autoPool and not hasTeleported then
+            doTeleport()
+        end
 
--- Spawn Bypass
-Player.CharacterAdded:Connect(function(char)
-    hasTeleported = false
-    hasTeleStrengthTeleported = false
-    momentorespawn = true
+        task.wait(0.4)
+    end
 end)
