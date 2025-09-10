@@ -44,7 +44,7 @@ local strengthLocations = {
     ["Mavi Kristal"] = Vector3.new(-2275, 1943, 1051)
 }
 
--- PSYCHIC POSITIONS (for selection only)
+-- PSYCHIC POSITIONS
 local psychicLocations = {
     ["1M"] = Vector3.new(-2531, 5486, -533),
     ["1B"] = Vector3.new(-2562, 5501, -435),
@@ -60,7 +60,7 @@ gui.Parent = PlayerGui
 
 -- PANEL
 local panel = Instance.new("Frame", gui)
-panel.Size = UDim2.new(0,400,0,350)
+panel.Size = UDim2.new(0,400,0,450)
 panel.Position = UDim2.new(0.3,0,0.3,0)
 panel.BackgroundColor3 = Color3.fromRGB(25,25,25)
 panel.Active = true
@@ -125,11 +125,11 @@ discordBtn.MouseButton1Click:Connect(function()
 end)
 
 -- CATEGORY BUTTONS
-local categories = {"Teleports","Farms","Auto"}
+local categories = {"Teleports","Farms","Auto","Psychic Teleports"}
 local catFrames = {}
 for i,cat in ipairs(categories) do
     local btn = Instance.new("TextButton", panel)
-    btn.Size = UDim2.new(0,80,0,28)
+    btn.Size = UDim2.new(0,100,0,28)
     btn.Position = UDim2.new(0,10,0,40 + (i-1)*32)
     btn.BackgroundColor3 = Color3.fromRGB(60,60,60)
     btn.Text = cat
@@ -139,8 +139,8 @@ for i,cat in ipairs(categories) do
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
 
     local frame = Instance.new("Frame", panel)
-    frame.Size = UDim2.new(1,-100,1,-50)
-    frame.Position = UDim2.new(0,100,0,40)
+    frame.Size = UDim2.new(1,-120,1,-50)
+    frame.Position = UDim2.new(0,120,0,40)
     frame.BackgroundTransparency = 1
     frame.Visible = i==1
     catFrames[cat] = frame
@@ -172,7 +172,6 @@ for name,pos in pairs(teleportLocations) do
     end)
     tpY = tpY + 36
 end
-
 -- FARMS FRAME
 local farmsFrame = catFrames["Farms"]
 
@@ -287,30 +286,48 @@ psychicBtn.MouseButton1Click:Connect(function()
     psychicBtn.Text = autoPsychic and "Auto Psychic: On" or "Auto Psychic: Off"
 end)
 
--- AUTO PSYCHIC HANDLER (3. item takacak, spam yapmaz)
-local function handleAutoPsychic()
-    task.spawn(function()
-        while true do
-            if autoPsychic then
-                local char = Player.Character
-                local backpack = Player:FindFirstChild("Backpack")
-                if char and backpack then
-                    local items = backpack:GetChildren()
-                    local equipped = char:FindFirstChildOfClass("Tool")
-                    if items[3] and items[3]:IsA("Tool") and equipped ~= items[3] then
-                        items[3].Parent = char
-                    end
-                    if items[3] and not char:FindFirstChild(items[3].Name) then
-                        items[3].Parent = char
-                    end
-                end
-            end
-            task.wait(0.5)
+-- PSYCHIC TELEPORTS FRAME
+local psychicFrame = catFrames["Psychic Teleports"]
+local py = 10
+for name,pos in pairs(psychicLocations) do
+    local btn = Instance.new("TextButton", psychicFrame)
+    btn.Size = UDim2.new(0,200,0,28)
+    btn.Position = UDim2.new(0,10,0,py)
+    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+    btn.MouseButton1Click:Connect(function()
+        local char = Player.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.CFrame = CFrame.new(pos)
         end
     end)
+    py = py + 36
 end
 
-handleAutoPsychic()
+-- AUTO PSYCHIC HANDLER
+task.spawn(function()
+    while true do
+        if autoPsychic then
+            local char = Player.Character
+            local backpack = Player:FindFirstChild("Backpack")
+            if char and backpack then
+                local items = backpack:GetChildren()
+                local equipped = char:FindFirstChildOfClass("Tool")
+                if items[3] and items[3]:IsA("Tool") and equipped ~= items[3] then
+                    items[3].Parent = char
+                end
+                if items[3] and not char:FindFirstChild(items[3].Name) then
+                    items[3].Parent = char
+                end
+            end
+        end
+        task.wait(0.5)
+    end
+end)
 
 -- CLICK LOOP
 task.spawn(function()
