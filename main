@@ -125,7 +125,7 @@ discordBtn.MouseButton1Click:Connect(function()
 end)
 
 -- CATEGORY BUTTONS
-local categories = {"Teleports","Farms","Auto","Psychic Teleports"}
+local categories = {"Teleports","Farms","Auto"}
 local catFrames = {}
 for i,cat in ipairs(categories) do
     local btn = Instance.new("TextButton", panel)
@@ -172,6 +172,7 @@ for name,pos in pairs(teleportLocations) do
     end)
     tpY = tpY + 36
 end
+
 -- FARMS FRAME
 local farmsFrame = catFrames["Farms"]
 
@@ -230,7 +231,6 @@ for name,_ in pairs(pools) do
     end)
     yOff = yOff + 30
 end
-
 -- Auto Strength Button
 local strengthBtn = Instance.new("TextButton", farmsFrame)
 strengthBtn.Size = UDim2.new(0,120,0,28)
@@ -271,7 +271,7 @@ for name,vec in pairs(strengthLocations) do
     sY = sY + 36
 end
 
--- Auto Psychic Button
+-- Auto Psychic Button (Farm Category)
 local psychicBtn = Instance.new("TextButton", farmsFrame)
 psychicBtn.Size = UDim2.new(0,120,0,28)
 psychicBtn.Position = UDim2.new(0,140,0,200)
@@ -286,43 +286,25 @@ psychicBtn.MouseButton1Click:Connect(function()
     psychicBtn.Text = autoPsychic and "Auto Psychic: On" or "Auto Psychic: Off"
 end)
 
--- PSYCHIC TELEPORTS FRAME
-local psychicFrame = catFrames["Psychic Teleports"]
-local py = 10
-for name,pos in pairs(psychicLocations) do
-    local btn = Instance.new("TextButton", psychicFrame)
-    btn.Size = UDim2.new(0,200,0,28)
-    btn.Position = UDim2.new(0,10,0,py)
-    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-    btn.Text = name
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
-    btn.MouseButton1Click:Connect(function()
-        local char = Player.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.CFrame = CFrame.new(pos)
-        end
-    end)
-    py = py + 36
-end
-
--- AUTO PSYCHIC HANDLER
+-- AUTO PSYCHIC HANDLER & TELEPORTS (Farm Category)
 task.spawn(function()
     while true do
-        if autoPsychic then
-            local char = Player.Character
-            local backpack = Player:FindFirstChild("Backpack")
-            if char and backpack then
-                local items = backpack:GetChildren()
-                local equipped = char:FindFirstChildOfClass("Tool")
-                if items[3] and items[3]:IsA("Tool") and equipped ~= items[3] then
-                    items[3].Parent = char
-                end
-                if items[3] and not char:FindFirstChild(items[3].Name) then
-                    items[3].Parent = char
-                end
+        local char = Player.Character
+        local backpack = Player:FindFirstChild("Backpack")
+        if autoPsychic and char and backpack then
+            -- Equip Psychic item automatically if not equipped
+            local items = backpack:GetChildren()
+            local equipped = char:FindFirstChildOfClass("Tool")
+            if items[3] and items[3]:IsA("Tool") and equipped ~= items[3] then
+                items[3].Parent = char
+            end
+            if items[3] and not char:FindFirstChild(items[3].Name) then
+                items[3].Parent = char
+            end
+
+            -- Teleport to selected psychic location
+            if char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.CFrame = CFrame.new(psychicLocations[selectedPsychic])
             end
         end
         task.wait(0.5)
