@@ -6,72 +6,70 @@ local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
 -- STATE VARS
-local running = false
-local infiniteJump = true -- açılır açılmaz aktif olacak
+local infiniteJump = true
 local autoPool = false
 local hasTeleported = false
 local lastPos = nil
-local clickPosition = Vector2.new(401, 270)
-local selectedPool = 1
+local selectedPool = "1. 100"
 local momentorespawn = false
+
 local autoStrength = false
 local hasTeleStrengthTeleported = false
 local selectedStrength = 1
+local strengthLocations = {
+    Vector3.new(403, 249, 988),
+    Vector3.new(-2275, 1943, 1051)
+}
 
--- TELEPORTS
-local teleportLocations = {
-    ["Pool 1"] = Vector3.new(366, 250, -446),
-    ["Pool 2"] = Vector3.new(348, 264, -499),
-    ["Pool 3"] = Vector3.new(1639, 260, 2250),
-    ["Pool 4"] = Vector3.new(-2303, 977, 1072),
-    ["Pool 5"] = Vector3.new(-2051, 714, -1893),
+local pools = {
+    ["1. 100"] = Vector3.new(366, 250, -446),
+    ["2. 10k"] = Vector3.new(348, 264, -499),
+    ["3. 100k"] = Vector3.new(1639, 260, 2250),
+    ["4. 1m"] = Vector3.new(-2303, 977, 1072),
+    ["5. 10m"] = Vector3.new(-2051, 714, -1893)
+}
+
+local teleports = {
     ["Quest"] = Vector3.new(489, 249, 895),
     ["Leaderboard"] = Vector3.new(-750, 249, 747)
 }
 
-local strengthLocations = {
-    ["Normal Taş"] = Vector3.new(403, 249, 988),
-    ["Mavi Kristal"] = Vector3.new(-2275, 1943, 1051)
-}
-
--- GUI ROOT
+-- GUI
 local gui = Instance.new("ScreenGui")
 gui.Name = "SPTSAuto"
 gui.ResetOnSpawn = false
 gui.Parent = PlayerGui
 
--- PANEL
 local panel = Instance.new("Frame", gui)
 panel.Size = UDim2.new(0, 400, 0, 350)
-panel.Position = UDim2.new(0.3, 0, 0.3, 0)
-panel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+panel.Position = UDim2.new(0.3,0,0.3,0)
+panel.BackgroundColor3 = Color3.fromRGB(25,25,25)
 panel.Active = true
 panel.Draggable = true
-Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", panel).CornerRadius = UDim.new(0,12)
 
--- TITLE
 local title = Instance.new("TextLabel", panel)
 title.Text = "⚡ SPTS Auto (By Zwac)"
-title.Size = UDim2.new(1, 0, 0, 28)
-title.Position = UDim2.new(0, 0, 0, 2)
+title.Size = UDim2.new(1,0,0,28)
+title.Position = UDim2.new(0,0,0,2)
 title.BackgroundTransparency = 1
-title.TextColor3 = Color3.fromRGB(230, 230, 230)
+title.TextColor3 = Color3.fromRGB(230,230,230)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 
 -- MINI BUTTON
 local miniBtn = Instance.new("TextButton", gui)
-miniBtn.Size = UDim2.new(0, 40, 0, 40)
-miniBtn.Position = UDim2.new(0, 10, 0, 200)
-miniBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+miniBtn.Size = UDim2.new(0,40,0,40)
+miniBtn.Position = UDim2.new(0,10,0,200)
+miniBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
 miniBtn.Text = "☰"
-miniBtn.TextColor3 = Color3.fromRGB(230, 230, 230)
+miniBtn.TextColor3 = Color3.fromRGB(230,230,230)
 miniBtn.Font = Enum.Font.GothamBold
 miniBtn.TextSize = 20
 miniBtn.Visible = false
 miniBtn.Active = true
 miniBtn.Draggable = true
-Instance.new("UICorner", miniBtn).CornerRadius = UDim.new(1, 0)
+Instance.new("UICorner", miniBtn).CornerRadius = UDim.new(1,0)
 miniBtn.MouseButton1Click:Connect(function()
     panel.Visible = true
     miniBtn.Visible = false
@@ -79,14 +77,14 @@ end)
 
 -- TOGGLE BUTTON
 local toggleBtn = Instance.new("TextButton", panel)
-toggleBtn.Size = UDim2.new(0, 50, 0, 50)
-toggleBtn.Position = UDim2.new(1, -60, 0, 2)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+toggleBtn.Size = UDim2.new(0,50,0,50)
+toggleBtn.Position = UDim2.new(1,-60,0,2)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
 toggleBtn.Text = "❌"
-toggleBtn.TextColor3 = Color3.fromRGB(230, 230, 230)
+toggleBtn.TextColor3 = Color3.fromRGB(230,230,230)
 toggleBtn.Font = Enum.Font.GothamBold
 toggleBtn.TextSize = 26
-Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(1, 0)
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(1,0)
 toggleBtn.MouseButton1Click:Connect(function()
     panel.Visible = false
     miniBtn.Visible = true
@@ -94,37 +92,37 @@ end)
 
 -- DISCORD BUTTON
 local discordBtn = Instance.new("TextButton", panel)
-discordBtn.Size = UDim2.new(0, 120, 0, 28)
-discordBtn.Position = UDim2.new(1, -130, 1, -38)
-discordBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 220)
+discordBtn.Size = UDim2.new(0,120,0,28)
+discordBtn.Position = UDim2.new(1,-130,1,-38)
+discordBtn.BackgroundColor3 = Color3.fromRGB(80,80,220)
 discordBtn.Text = "Discord"
-discordBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
+discordBtn.TextColor3 = Color3.fromRGB(240,240,240)
 discordBtn.Font = Enum.Font.GothamBold
 discordBtn.TextSize = 14
-Instance.new("UICorner", discordBtn).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", discordBtn).CornerRadius = UDim.new(0,8)
 discordBtn.MouseButton1Click:Connect(function()
     if setclipboard then setclipboard("https://discord.gg/xwUDTAKFK5") end
 end)
 
 -- CATEGORY BUTTONS
-local categories = {"Teleports","Farms","Auto","Misc","Settings"}
+local categories = {"Teleports","Farms","Misc"}
 local catFrames = {}
 for i,cat in ipairs(categories) do
     local btn = Instance.new("TextButton", panel)
-    btn.Size = UDim2.new(0, 80, 0, 28)
-    btn.Position = UDim2.new(0, 10, 0, 40 + (i-1)*32)
-    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    btn.Size = UDim2.new(0,80,0,28)
+    btn.Position = UDim2.new(0,10,0,40 + (i-1)*32)
+    btn.BackgroundColor3 = Color3.fromRGB(60,60,60)
     btn.Text = cat
     btn.TextColor3 = Color3.fromRGB(255,255,255)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
 
     local frame = Instance.new("Frame", panel)
-    frame.Size = UDim2.new(1, -100, 1, -50)
-    frame.Position = UDim2.new(0, 100, 0, 40)
+    frame.Size = UDim2.new(1,-100,1,-50)
+    frame.Position = UDim2.new(0,100,0,40)
     frame.BackgroundTransparency = 1
-    frame.Visible = i == 1
+    frame.Visible = i==1
     catFrames[cat] = frame
 
     btn.MouseButton1Click:Connect(function()
@@ -133,32 +131,32 @@ for i,cat in ipairs(categories) do
     end)
 end
 
--- TELEPORTS FRAME
-local teleportFrame = catFrames["Teleports"]
-local tpY = 10
-for name,vec in pairs(teleportLocations) do
-    local btn = Instance.new("TextButton", teleportFrame)
-    btn.Size = UDim2.new(0, 200, 0, 28)
-    btn.Position = UDim2.new(0, 10, 0, tpY)
-    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
+-- TELEPORTS
+local teleFrame = catFrames["Teleports"]
+local teleOffset = 0
+for name,pos in pairs(teleports) do
+    local btn = Instance.new("TextButton", teleFrame)
+    btn.Size = UDim2.new(0,140,0,28)
+    btn.Position = UDim2.new(0,10,0,10+teleOffset)
+    btn.BackgroundColor3 = Color3.fromRGB(80,120,200)
     btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(240,240,240)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
     btn.MouseButton1Click:Connect(function()
         local char = Player.Character
         if char and char:FindFirstChild("HumanoidRootPart") then
-            char.HumanoidRootPart.CFrame = CFrame.new(vec)
+            char.HumanoidRootPart.CFrame = CFrame.new(pos)
         end
     end)
-    tpY = tpY + 36
+    teleOffset = teleOffset + 32
 end
 
 -- FARMS FRAME
 local farmsFrame = catFrames["Farms"]
 
--- Auto Pool Button
+-- AUTO POOL
 local poolBtn = Instance.new("TextButton", farmsFrame)
 poolBtn.Size = UDim2.new(0,120,0,28)
 poolBtn.Position = UDim2.new(0,10,0,10)
@@ -174,10 +172,50 @@ poolBtn.MouseButton1Click:Connect(function()
     hasTeleported = false
 end)
 
--- Auto Strength Button
+-- POOL DROPDOWN
+local poolSelectBtn = Instance.new("TextButton", farmsFrame)
+poolSelectBtn.Size = UDim2.new(0,120,0,28)
+poolSelectBtn.Position = UDim2.new(0,140,0,10)
+poolSelectBtn.Text = "Select Pool"
+poolSelectBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
+poolSelectBtn.TextColor3 = Color3.fromRGB(240,240,240)
+poolSelectBtn.Font = Enum.Font.GothamBold
+poolSelectBtn.TextSize = 14
+Instance.new("UICorner", poolSelectBtn).CornerRadius = UDim.new(0,8)
+
+local poolFrame = Instance.new("Frame", farmsFrame)
+poolFrame.Size = UDim2.new(0,120,0,0)
+poolFrame.Position = UDim2.new(0,140,0,38)
+poolFrame.BackgroundColor3 = Color3.fromRGB(60,60,60)
+poolFrame.Visible = false
+Instance.new("UICorner", poolFrame).CornerRadius = UDim.new(0,6)
+
+poolSelectBtn.MouseButton1Click:Connect(function()
+    poolFrame.Visible = not poolFrame.Visible
+end)
+
+local yOff = 0
+for name,_ in pairs(pools) do
+    local btn = Instance.new("TextButton", poolFrame)
+    btn.Size = UDim2.new(1,0,0,28)
+    btn.Position = UDim2.new(0,0,0,yOff)
+    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(240,240,240)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+    btn.MouseButton1Click:Connect(function()
+        selectedPool = name
+        poolFrame.Visible = false
+    end)
+    yOff = yOff + 30
+end
+
+-- AUTO STRENGTH
 local strengthBtn = Instance.new("TextButton", farmsFrame)
 strengthBtn.Size = UDim2.new(0,120,0,28)
-strengthBtn.Position = UDim2.new(0, 150,0,10)
+strengthBtn.Position = UDim2.new(0, 10, 0, 200)
 strengthBtn.Text = "Auto Strength: Off"
 strengthBtn.BackgroundColor3 = Color3.fromRGB(200,120,50)
 strengthBtn.TextColor3 = Color3.fromRGB(240,240,240)
@@ -190,41 +228,6 @@ strengthBtn.MouseButton1Click:Connect(function()
     hasTeleStrengthTeleported = false
 end)
 
--- Strength Selection
-local sY = 50
-for name,vec in pairs(strengthLocations) do
-    local btn = Instance.new("TextButton", farmsFrame)
-    btn.Size = UDim2.new(0,100,0,28)
-    btn.Position = UDim2.new(0,10,0,sY)
-    btn.Text = name
-    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
-    btn.MouseButton1Click:Connect(function()
-        selectedStrength = vec
-        for _,b in pairs(farmsFrame:GetChildren()) do
-            if b:IsA("TextButton") and b.TextColor3 ~= Color3.fromRGB(240,240,240) then
-                b.BackgroundColor3 = Color3.fromRGB(70,70,70)
-            end
-        end
-        btn.BackgroundColor3 = Color3.fromRGB(70,70,150)
-    end)
-    sY = sY + 36
-end
-
--- CLICK LOOP
-task.spawn(function()
-    while true do
-        if running and clickPosition then
-            VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,true,game,1)
-            VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,false,game,1)
-        end
-        task.wait(0.05)
-    end
-end)
-
 -- INFINITE JUMP
 UserInputService.JumpRequest:Connect(function()
     if infiniteJump then
@@ -235,86 +238,46 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- AUTO POOL LOOP
-local function doTeleport()
-    local char = Player.Character
-    if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
-        char.HumanoidRootPart.CFrame = CFrame.new(teleportLocations["Pool " .. selectedPool])
-        hasTeleported = true
-    end
-end
-
-RunService.RenderStepped:Connect(function()
-    local char = Player.Character
-    if char and char:FindFirstChild("HumanoidRootPart") and autoPool then
-        local pos = char.HumanoidRootPart.Position
-        if lastPos and (pos-lastPos).Magnitude > 1 then hasTeleported = false end
-        lastPos = pos
-    end
-end)
-
+-- AUTO LOOP
 task.spawn(function()
     while true do
-        if autoPool and not hasTeleported then doTeleport() end
+        if autoPool then
+            local char = Player.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local hrp = char.HumanoidRootPart
+                if not hasTeleported or (hrp.Position - pools[selectedPool]).Magnitude > 5 then
+                    hrp.CFrame = CFrame.new(pools[selectedPool])
+                    hasTeleported = true
+                end
+            end
+        else hasTeleported=false end
+
+        if autoStrength then
+            local char = Player.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local hrp = char.HumanoidRootPart
+                if not hasTeleStrengthTeleported or (hrp.Position - strengthLocations[selectedStrength]).Magnitude > 5 then
+                    hrp.CFrame = CFrame.new(strengthLocations[selectedStrength])
+                    hasTeleStrengthTeleported = true
+                end
+                game:GetService("ReplicatedStorage").RemoteEvent:FireServer({{"Add_FS_Request"}})
+            end
+        else hasTeleStrengthTeleported=false end
+
         -- SPAWN BYPASS
         local char = Player.Character
         if char and char:FindFirstChild("Humanoid") then
             local hum = char.Humanoid
-            if hum.Health <= hum.MaxHealth*0.6 then momentorespawn = true end
+            if hum.Health <= hum.MaxHealth*0.6 then momentorespawn=true end
             if momentorespawn then
                 char:Remove()
                 task.wait(0.1)
                 game:GetService("ReplicatedStorage").RemoteEvent:FireServer({"Respawn"})
                 task.wait(0.1)
-                momentorespawn = false
+                momentorespawn=false
             end
         end
-        task.wait(0.4)
+
+        task.wait(0.05)
     end
 end)
-
--- AUTO STRENGTH LOOP
-task.spawn(function()
-    while true do
-        if autoStrength and selectedStrength then
-            local char = Player.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.CFrame = CFrame.new(selectedStrength)
-                local args = {[1] = {[1] = "Add_FS_Request"}}
-                game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
-                VirtualInputManager:SendMouseButtonEvent(
-                    clickPosition.X, clickPosition.Y,0,true,game,1
-                )
-                VirtualInputManager:SendMouseButtonEvent(
-                    clickPosition.X, clickPosition.Y,0,false,game,1
-                )
-            end
-        else
-            hasTeleStrengthTeleported = false
-        end
-        task.wait(0.1)
-    end
-end)
-
--- DEATH / RESPAWN HANDLER
-local function setupDeathHandler()
-    local function connectDied()
-        local char = Player.Character
-        if char then
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            if hum then
-                hum.Died:Connect(function()
-                    hasTeleported=false
-                    hasTeleStrengthTeleported=false
-                    task.wait(1)
-                    Player.CharacterAdded:Wait()
-                    task.wait(0.5)
-                    doTeleport()
-                end)
-            end
-        end
-    end
-    Player.CharacterAdded:Connect(function() task.wait(0.5); connectDied() end)
-    connectDied()
-end
-setupDeathHandler()
