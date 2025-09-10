@@ -110,20 +110,6 @@ toggleBtn.MouseButton1Click:Connect(function()
     miniBtn.Visible = true
 end)
 
--- DISCORD BUTTON
-local discordBtn = Instance.new("TextButton", panel)
-discordBtn.Size = UDim2.new(0,120,0,28)
-discordBtn.Position = UDim2.new(1,-130,1,-38)
-discordBtn.BackgroundColor3 = Color3.fromRGB(80,80,220)
-discordBtn.Text = "Discord"
-discordBtn.TextColor3 = Color3.fromRGB(240,240,240)
-discordBtn.Font = Enum.Font.GothamBold
-discordBtn.TextSize = 14
-Instance.new("UICorner", discordBtn).CornerRadius = UDim.new(0,8)
-discordBtn.MouseButton1Click:Connect(function()
-    if setclipboard then setclipboard("https://discord.gg/xwUDTAKFK5") end
-end)
-
 -- CATEGORY BUTTONS
 local categories = {"Teleports","Farms","Auto"}
 local catFrames = {}
@@ -231,10 +217,10 @@ for name,_ in pairs(pools) do
     end)
     yOff = yOff + 30
 end
--- Auto Psychic Button (Farm Category)
+-- Auto Psychic Button
 local psychicBtn = Instance.new("TextButton", farmsFrame)
-psychicBtn.Size = UDim2.new(0,120,0,100)  -- üstte durması için y konumu ayarlandı
-psychicBtn.Position = UDim2.new(0,10,0,80)
+psychicBtn.Size = UDim2.new(0,120,0,50)
+psychicBtn.Position = UDim2.new(0,10,0,50)
 psychicBtn.Text = "Auto Psychic: Off"
 psychicBtn.BackgroundColor3 = Color3.fromRGB(180,50,180)
 psychicBtn.TextColor3 = Color3.fromRGB(240,240,240)
@@ -246,10 +232,10 @@ psychicBtn.MouseButton1Click:Connect(function()
     psychicBtn.Text = autoPsychic and "Auto Psychic: On" or "Auto Psychic: Off"
 end)
 
--- Psychic Selection
+-- Psychic Selection Button
 local psychicSelectBtn = Instance.new("TextButton", farmsFrame)
 psychicSelectBtn.Size = UDim2.new(0,120,0,28)
-psychicSelectBtn.Position = UDim2.new(0,140,0,80)
+psychicSelectBtn.Position = UDim2.new(0,140,0,50)
 psychicSelectBtn.Text = "Select Psychic"
 psychicSelectBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
 psychicSelectBtn.TextColor3 = Color3.fromRGB(240,240,240)
@@ -259,7 +245,7 @@ Instance.new("UICorner", psychicSelectBtn).CornerRadius = UDim.new(0,8)
 
 local psychicFrame = Instance.new("Frame", farmsFrame)
 psychicFrame.Size = UDim2.new(0,120,0,0)
-psychicFrame.Position = UDim2.new(0,140,0,108)
+psychicFrame.Position = UDim2.new(0,140,0,78)
 psychicFrame.BackgroundColor3 = Color3.fromRGB(60,60,60)
 psychicFrame.Visible = false
 Instance.new("UICorner", psychicFrame).CornerRadius = UDim.new(0,6)
@@ -268,11 +254,11 @@ psychicSelectBtn.MouseButton1Click:Connect(function()
     psychicFrame.Visible = not psychicFrame.Visible
 end)
 
-local yOffP = 0
+local pY = 0
 for name,_ in pairs(psychicLocations) do
     local btn = Instance.new("TextButton", psychicFrame)
     btn.Size = UDim2.new(1,0,0,28)
-    btn.Position = UDim2.new(0,0,0,yOffP)
+    btn.Position = UDim2.new(0,0,0,pY)
     btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
     btn.Text = name
     btn.TextColor3 = Color3.fromRGB(240,240,240)
@@ -283,13 +269,13 @@ for name,_ in pairs(psychicLocations) do
         selectedPsychic = name
         psychicFrame.Visible = false
     end)
-    yOffP = yOffP + 30
+    pY = pY + 30
 end
 
 -- Auto Strength Button
 local strengthBtn = Instance.new("TextButton", farmsFrame)
-strengthBtn.Size = UDim2.new(0,120,0,28)
-strengthBtn.Position = UDim2.new(0,10,0,140)
+strengthBtn.Size = UDim2.new(0,120,0,200)
+strengthBtn.Position = UDim2.new(0,10,0,200)
 strengthBtn.Text = "Auto Strength: Off"
 strengthBtn.BackgroundColor3 = Color3.fromRGB(200,120,50)
 strengthBtn.TextColor3 = Color3.fromRGB(240,240,240)
@@ -302,31 +288,21 @@ strengthBtn.MouseButton1Click:Connect(function()
     hasTeleStrengthTeleported = false
 end)
 
--- Strength Selection
-local sY = 180
-for name,vec in pairs(strengthLocations) do
-    local btn = Instance.new("TextButton", farmsFrame)
-    btn.Size = UDim2.new(0,100,0,28)
-    btn.Position = UDim2.new(0,10,0,sY)
-    btn.Text = name
-    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
-    btn.MouseButton1Click:Connect(function()
-        selectedStrength = vec
-        for _,b in pairs(farmsFrame:GetChildren()) do
-            if b:IsA("TextButton") and b.TextColor3 ~= Color3.fromRGB(240,240,240) then
-                b.BackgroundColor3 = Color3.fromRGB(70,70,70)
-            end
-        end
-        btn.BackgroundColor3 = Color3.fromRGB(70,70,150)
-    end)
-    sY = sY + 36
-end
+-- Discord Button
+local discordBtn = Instance.new("TextButton", farmsFrame)
+discordBtn.Size = UDim2.new(0,120,0,28)
+discordBtn.Position = UDim2.new(0,10,0,400)
+discordBtn.BackgroundColor3 = Color3.fromRGB(80,80,220)
+discordBtn.Text = "Discord"
+discordBtn.TextColor3 = Color3.fromRGB(240,240,240)
+discordBtn.Font = Enum.Font.GothamBold
+discordBtn.TextSize = 14
+Instance.new("UICorner", discordBtn).CornerRadius = UDim.new(0,8)
+discordBtn.MouseButton1Click:Connect(function()
+    if setclipboard then setclipboard("https://discord.gg/xwUDTAKFK5") end
+end)
 
--- AUTO PSYCHIC HANDLER & TELEPORT
+-- AUTO PSYCHIC HANDLER
 task.spawn(function()
     while true do
         local char = Player.Character
@@ -341,12 +317,87 @@ task.spawn(function()
             if items[3] and not char:FindFirstChild(items[3].Name) then
                 items[3].Parent = char
             end
-
             -- Teleport to selected psychic location
             if char:FindFirstChild("HumanoidRootPart") then
                 char.HumanoidRootPart.CFrame = CFrame.new(psychicLocations[selectedPsychic])
             end
         end
         task.wait(0.5)
+    end
+end)
+
+-- AUTO STRENGTH LOOP
+task.spawn(function()
+    while true do
+        if autoStrength and selectedStrength then
+            local char = Player.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.CFrame = CFrame.new(selectedStrength)
+                local args = {[1] = {[1] = "Add_FS_Request"}}
+                ReplicatedStorage.RemoteEvent:FireServer(unpack(args))
+                VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,true,game,1)
+                VirtualInputManager:SendMouseButtonEvent(clickPosition.X, clickPosition.Y,0,false,game,1)
+            end
+        else
+            hasTeleStrengthTeleported = false
+        end
+        task.wait(0.1)
+    end
+end)
+
+-- SPAWN / DEATH HANDLER
+local function setupDeathHandler()
+    local function connectDied()
+        local char = Player.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.Died:Connect(function()
+                    hasTeleported = false
+                    hasTeleStrengthTeleported = false
+                    task.wait(1)
+                    Player.CharacterAdded:Wait()
+                    task.wait(0.5)
+                    local char = Player.Character
+                    if char and char:FindFirstChild("HumanoidRootPart") then
+                        char.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
+                    end
+                end)
+            end
+        end
+    end
+    Player.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        connectDied()
+    end)
+    connectDied()
+end
+setupDeathHandler()
+
+-- AUTO POOL & RESPAWN BYPASS LOOP
+task.spawn(function()
+    while true do
+        local char = Player.Character
+        if char and char:FindFirstChild("Humanoid") then
+            local hum = char.Humanoid
+            if hum.Health <= hum.MaxHealth * 0.6 then
+                momentorespawn = true
+            end
+            if momentorespawn then
+                char:Remove()
+                task.wait(0.1)
+                ReplicatedStorage.RemoteEvent:FireServer({"Respawn"})
+                task.wait(0.1)
+                momentorespawn = false
+            end
+        end
+        if autoPool and not hasTeleported then
+            local char = Player.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
+                hasTeleported = true
+            end
+        end
+        task.wait(0.4)
     end
 end)
