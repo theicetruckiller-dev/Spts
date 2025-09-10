@@ -110,20 +110,6 @@ toggleBtn.MouseButton1Click:Connect(function()
     miniBtn.Visible = true
 end)
 
--- DISCORD BUTTON
-local discordBtn = Instance.new("TextButton", panel)
-discordBtn.Size = UDim2.new(0,120,0,28)
-discordBtn.Position = UDim2.new(1,-130,1,-38)
-discordBtn.BackgroundColor3 = Color3.fromRGB(80,80,220)
-discordBtn.Text = "Discord"
-discordBtn.TextColor3 = Color3.fromRGB(240,240,240)
-discordBtn.Font = Enum.Font.GothamBold
-discordBtn.TextSize = 14
-Instance.new("UICorner", discordBtn).CornerRadius = UDim.new(0,8)
-discordBtn.MouseButton1Click:Connect(function()
-    if setclipboard then setclipboard("https://discord.gg/xwUDTAKFK5") end
-end)
-
 -- CATEGORY BUTTONS
 local categories = {"Teleports","Farms","Auto"}
 local catFrames = {}
@@ -231,6 +217,7 @@ for name,_ in pairs(pools) do
     end)
     yOff = yOff + 30
 end
+
 -- Auto Strength Button
 local strengthBtn = Instance.new("TextButton", farmsFrame)
 strengthBtn.Size = UDim2.new(0,120,0,28)
@@ -270,7 +257,6 @@ for name,vec in pairs(strengthLocations) do
     end)
     sY = sY + 36
 end
-
 -- Auto Psychic Button (Farm Category)
 local psychicBtn = Instance.new("TextButton", farmsFrame)
 psychicBtn.Size = UDim2.new(0,120,0,28)
@@ -285,6 +271,46 @@ psychicBtn.MouseButton1Click:Connect(function()
     autoPsychic = not autoPsychic
     psychicBtn.Text = autoPsychic and "Auto Psychic: On" or "Auto Psychic: Off"
 end)
+
+-- Psychic Selection Dropdown
+local psychicSelectBtn = Instance.new("TextButton", farmsFrame)
+psychicSelectBtn.Size = UDim2.new(0,120,0,28)
+psychicSelectBtn.Position = UDim2.new(0,270,0,200)
+psychicSelectBtn.Text = "Select Psychic"
+psychicSelectBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
+psychicSelectBtn.TextColor3 = Color3.fromRGB(240,240,240)
+psychicSelectBtn.Font = Enum.Font.GothamBold
+psychicSelectBtn.TextSize = 14
+Instance.new("UICorner", psychicSelectBtn).CornerRadius = UDim.new(0,8)
+
+local psychicFrame = Instance.new("Frame", farmsFrame)
+psychicFrame.Size = UDim2.new(0,120,0,0)
+psychicFrame.Position = UDim2.new(0,270,0,228)
+psychicFrame.BackgroundColor3 = Color3.fromRGB(60,60,60)
+psychicFrame.Visible = false
+Instance.new("UICorner", psychicFrame).CornerRadius = UDim.new(0,6)
+
+psychicSelectBtn.MouseButton1Click:Connect(function()
+    psychicFrame.Visible = not psychicFrame.Visible
+end)
+
+local yPsy = 0
+for name,_ in pairs(psychicLocations) do
+    local btn = Instance.new("TextButton", psychicFrame)
+    btn.Size = UDim2.new(1,0,0,28)
+    btn.Position = UDim2.new(0,0,0,yPsy)
+    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(240,240,240)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+    btn.MouseButton1Click:Connect(function()
+        selectedPsychic = name
+        psychicFrame.Visible = false
+    end)
+    yPsy = yPsy + 30
+end
 
 -- AUTO PSYCHIC HANDLER & TELEPORTS (Farm Category)
 task.spawn(function()
