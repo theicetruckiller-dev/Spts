@@ -40,7 +40,7 @@ local pools = {
 
 -- STRENGTH LOCATIONS
 local strengthLocations = {
-    ["Normal TaÅŸ"] = Vector3.new(403, 249, 988),
+    ["Normal Taş"] = Vector3.new(403, 249, 988),
     ["Mavi Kristal"] = Vector3.new(-2275, 1943, 1051)
 }
 
@@ -69,7 +69,7 @@ Instance.new("UICorner", panel).CornerRadius = UDim.new(0,12)
 
 -- TITLE
 local title = Instance.new("TextLabel", panel)
-title.Text = "âš¡ SPTS Auto (By Zwac)"
+title.Text = "⚡ SPTS Auto (By Zwac)"
 title.Size = UDim2.new(1,0,0,28)
 title.Position = UDim2.new(0,0,0,2)
 title.BackgroundTransparency = 1
@@ -82,7 +82,7 @@ local miniBtn = Instance.new("TextButton", gui)
 miniBtn.Size = UDim2.new(0,40,0,40)
 miniBtn.Position = UDim2.new(0,10,0,200)
 miniBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-miniBtn.Text = "â˜°"
+miniBtn.Text = "☰"
 miniBtn.TextColor3 = Color3.fromRGB(230,230,230)
 miniBtn.Font = Enum.Font.GothamBold
 miniBtn.TextSize = 20
@@ -100,7 +100,7 @@ local toggleBtn = Instance.new("TextButton", panel)
 toggleBtn.Size = UDim2.new(0,50,0,50)
 toggleBtn.Position = UDim2.new(1,-60,0,2)
 toggleBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-toggleBtn.Text = "âŒ"
+toggleBtn.Text = "❌"
 toggleBtn.TextColor3 = Color3.fromRGB(230,230,230)
 toggleBtn.Font = Enum.Font.GothamBold
 toggleBtn.TextSize = 26
@@ -287,45 +287,30 @@ psychicBtn.MouseButton1Click:Connect(function()
     psychicBtn.Text = autoPsychic and "Auto Psychic: On" or "Auto Psychic: Off"
 end)
 
--- Psychic Selection
-local psychicSelectBtn = Instance.new("TextButton", farmsFrame)
-psychicSelectBtn.Size = UDim2.new(0,120,0,28)
-psychicSelectBtn.Position = UDim2.new(0,270,0,200)
-psychicSelectBtn.Text = "Select Psychic"
-psychicSelectBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
-psychicSelectBtn.TextColor3 = Color3.fromRGB(240,240,240)
-psychicSelectBtn.Font = Enum.Font.GothamBold
-psychicSelectBtn.TextSize = 14
-Instance.new("UICorner", psychicSelectBtn).CornerRadius = UDim.new(0,8)
-
-local psychicFrame = Instance.new("Frame", farmsFrame)
-psychicFrame.Size = UDim2.new(0,120,0,0)
-psychicFrame.Position = UDim2.new(0,270,0,228)
-psychicFrame.BackgroundColor3 = Color3.fromRGB(60,60,60)
-psychicFrame.Visible = false
-Instance.new("UICorner", psychicFrame).CornerRadius = UDim.new(0,6)
-
-psychicSelectBtn.MouseButton1Click:Connect(function()
-    psychicFrame.Visible = not psychicFrame.Visible
-end)
-
-local pyOff = 0
-for name,_ in pairs(psychicLocations) do
-    local btn = Instance.new("TextButton", psychicFrame)
-    btn.Size = UDim2.new(1,0,0,28)
-    btn.Position = UDim2.new(0,0,0,pyOff)
-    btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-    btn.Text = name
-    btn.TextColor3 = Color3.fromRGB(240,240,240)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
-    btn.MouseButton1Click:Connect(function()
-        selectedPsychic = name
-        psychicFrame.Visible = false
+-- AUTO PSYCHIC HANDLER (3. item takacak, spam yapmaz)
+local function handleAutoPsychic()
+    task.spawn(function()
+        while true do
+            if autoPsychic then
+                local char = Player.Character
+                local backpack = Player:FindFirstChild("Backpack")
+                if char and backpack then
+                    local items = backpack:GetChildren()
+                    local equipped = char:FindFirstChildOfClass("Tool")
+                    if items[3] and items[3]:IsA("Tool") and equipped ~= items[3] then
+                        items[3].Parent = char
+                    end
+                    if items[3] and not char:FindFirstChild(items[3].Name) then
+                        items[3].Parent = char
+                    end
+                end
+            end
+            task.wait(0.5)
+        end
     end)
-    pyOff = pyOff + 30
 end
+
+handleAutoPsychic()
 
 -- CLICK LOOP
 task.spawn(function()
@@ -385,25 +370,6 @@ task.spawn(function()
     end
 end)
 
--- AUTO PSYCHIC LOOP
-task.spawn(function()
-    while true do
-        if autoPsychic then
-            local char = Player.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                local args = {
-                    [1] = {
-                        [1] = "Meditation_Request",
-                        [2] = true
-                    }
-                }
-                ReplicatedStorage.RemoteEvent:FireServer(unpack(args))
-            end
-        end
-        task.wait(0.5)
-    end
-end)
-
 -- SPAWN / DEATH HANDLER
 local function setupDeathHandler()
     local function connectDied()
@@ -412,27 +378,12 @@ local function setupDeathHandler()
             local hum = char:FindFirstChildOfClass("Humanoid")
             if hum then
                 hum.Died:Connect(function()
-                    -- Reset teleports
                     hasTeleported = false
                     hasTeleStrengthTeleported = false
-
-                    -- Wait for respawn
                     task.wait(1)
                     Player.CharacterAdded:Wait()
                     task.wait(0.5)
-
-                    -- Teleport to Auto Pool if enabled
                     doTeleport()
-
-                    -- Teleport to Auto Strength if enabled
-                    if autoStrength and selectedStrength then
-                        local char2 = Player.Character
-                        if char2 and char2:FindFirstChild("HumanoidRootPart") then
-                            char2.HumanoidRootPart.CFrame = CFrame.new(selectedStrength)
-                        end
-                    end
-
-                    -- Auto Psychic will automatically fire from loop
                 end)
             end
         end
@@ -465,12 +416,9 @@ task.spawn(function()
                 momentorespawn = false
             end
         end
-
-        -- Auto Pool Teleport
         if autoPool and not hasTeleported then
             doTeleport()
         end
-
         task.wait(0.4)
     end
 end)
