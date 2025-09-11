@@ -10,7 +10,7 @@ local PlayerGui = Player:WaitForChild("PlayerGui")
 
 -- STATE VARS
 local running = false
-local infiniteJump = false -- artık toggle olacak
+local infiniteJump = false
 local autoPool = false
 local autoStrength = false
 local autoPsychic = false
@@ -111,7 +111,7 @@ toggleBtn.MouseButton1Click:Connect(function()
 end)
 
 -- CATEGORY BUTTONS
-local categories = {"Teleports","Farms","Auto","Misc"}
+local categories = {"Teleports","Farms","Misc"}
 local catFrames = {}
 for i,cat in ipairs(categories) do
     local btn = Instance.new("TextButton", panel)
@@ -137,6 +137,76 @@ for i,cat in ipairs(categories) do
     end)
 end
 
+-- MISC FRAME (Infinite Jump)
+local miscFrame = catFrames["Misc"]
+local infiniteBtn = Instance.new("TextButton", miscFrame)
+infiniteBtn.Size = UDim2.new(0,180,0,28)
+infiniteBtn.Position = UDim2.new(0,10,0,10)
+infiniteBtn.BackgroundColor3 = Color3.fromRGB(50,150,50)
+infiniteBtn.TextColor3 = Color3.fromRGB(240,240,240)
+infiniteBtn.Font = Enum.Font.GothamBold
+infiniteBtn.TextSize = 14
+infiniteBtn.Text = "Sonsuz Zıplama: Kapalı"
+Instance.new("UICorner", infiniteBtn).CornerRadius = UDim.new(0,6)
+
+-- Toggle Infinite Jump
+infiniteBtn.MouseButton1Click:Connect(function()
+    infiniteJump = not infiniteJump
+    infiniteBtn.Text = infiniteJump and "Sonsuz Zıplama: Açık" or "Sonsuz Zıplama: Kapalı"
+    infiniteBtn.BackgroundColor3 = infiniteJump and Color3.fromRGB(27,94,32) or Color3.fromRGB(50,150,50)
+end)
+
+-- Draggable Infinite Button
+local dragging, dragInput, dragStart, startPos
+infiniteBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = infiniteBtn.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+infiniteBtn.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        infiniteBtn.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- INFINITE JUMP HANDLER
+UserInputService.JumpRequest:Connect(function()
+    if infiniteJump then
+        local char = Player.Character
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if infiniteJump then
+        local char = Player.Character
+        if char then
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                local state = humanoid:GetState()
+                if state ~= Enum.HumanoidStateType.Freefall and state ~= Enum.HumanoidStateType.Seated and humanoid.FloorMaterial ~= Enum.Material.Air then
+                    humanoid.Jump = true
+                end
+            end
+        end
+    end
+end)
 -- TELEPORTS FRAME
 local teleportFrame = catFrames["Teleports"]
 local tpY = 10
@@ -162,7 +232,7 @@ end
 -- FARMS FRAME
 local farmsFrame = catFrames["Farms"]
 
--- Auto Pool Button
+-- Auto Pool Toggle
 local poolBtn = Instance.new("TextButton", farmsFrame)
 poolBtn.Size = UDim2.new(0,120,0,28)
 poolBtn.Position = UDim2.new(0,10,0,10)
@@ -178,7 +248,7 @@ poolBtn.MouseButton1Click:Connect(function()
     hasTeleported = false
 end)
 
--- Pool Selection
+-- Pool Selection Dropdown
 local poolSelectBtn = Instance.new("TextButton", farmsFrame)
 poolSelectBtn.Size = UDim2.new(0,120,0,28)
 poolSelectBtn.Position = UDim2.new(0,140,0,10)
@@ -218,7 +288,7 @@ for name,_ in pairs(pools) do
     yOff = yOff + 30
 end
 
--- Auto Psychic Button
+-- Auto Psychic Toggle
 local psychicBtn = Instance.new("TextButton", farmsFrame)
 psychicBtn.Size = UDim2.new(0,120,0,28)
 psychicBtn.Position = UDim2.new(0,10,0,50)
@@ -232,7 +302,8 @@ psychicBtn.MouseButton1Click:Connect(function()
     autoPsychic = not autoPsychic
     psychicBtn.Text = autoPsychic and "Auto Psychic: On" or "Auto Psychic: Off"
 end)
--- Psychic Selection Button
+
+-- Psychic Selection Dropdown
 local psychicSelectBtn = Instance.new("TextButton", farmsFrame)
 psychicSelectBtn.Size = UDim2.new(0,120,0,28)
 psychicSelectBtn.Position = UDim2.new(0,140,0,50)
@@ -271,8 +342,7 @@ for name,_ in pairs(psychicLocations) do
     end)
     pY = pY + 30
 end
-
--- Auto Strength Button
+-- Auto Strength Toggle
 local strengthBtn = Instance.new("TextButton", farmsFrame)
 strengthBtn.Size = UDim2.new(0,120,0,28)
 strengthBtn.Position = UDim2.new(0,10,0,90)
@@ -288,7 +358,7 @@ strengthBtn.MouseButton1Click:Connect(function()
     hasTeleStrengthTeleported = false
 end)
 
--- Strength Selection Button
+-- Strength Selection Dropdown
 local strengthSelectBtn = Instance.new("TextButton", farmsFrame)
 strengthSelectBtn.Size = UDim2.new(0,120,0,28)
 strengthSelectBtn.Position = UDim2.new(0,140,0,90)
@@ -328,65 +398,40 @@ for name,pos in pairs(strengthLocations) do
     sY = sY + 30
 end
 
--- MISC FRAME
-local miscFrame = catFrames["Misc"]
-
--- Infinite Jump Toggle
-local ijBtn = Instance.new("TextButton", miscFrame)
-ijBtn.Size = UDim2.new(0,150,0,28)
-ijBtn.Position = UDim2.new(0,10,0,10)
-ijBtn.BackgroundColor3 = Color3.fromRGB(100,100,100)
-ijBtn.Text = "Infinite Jump: Off"
-ijBtn.TextColor3 = Color3.fromRGB(240,240,240)
-ijBtn.Font = Enum.Font.GothamBold
-ijBtn.TextSize = 14
-Instance.new("UICorner", ijBtn).CornerRadius = UDim.new(0,8)
-ijBtn.MouseButton1Click:Connect(function()
-    infiniteJump = not infiniteJump
-    ijBtn.Text = infiniteJump and "Infinite Jump: On" or "Infinite Jump: Off"
+-- Discord Button
+local discordBtn = Instance.new("TextButton", farmsFrame)
+discordBtn.Size = UDim2.new(0,120,0,28)
+discordBtn.Position = UDim2.new(0,10,0,130)
+discordBtn.BackgroundColor3 = Color3.fromRGB(80,80,220)
+discordBtn.Text = "Discord"
+discordBtn.TextColor3 = Color3.fromRGB(240,240,240)
+discordBtn.Font = Enum.Font.GothamBold
+discordBtn.TextSize = 14
+Instance.new("UICorner", discordBtn).CornerRadius = UDim.new(0,8)
+discordBtn.MouseButton1Click:Connect(function()
+    if setclipboard then setclipboard("https://discord.gg/xwUDTAKFK5") end
 end)
 
--- Infinite Jump Handler
-local canJump = true
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if infiniteJump and input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.Space then
-        local char = Player.Character
-        if char and char:FindFirstChild("Humanoid") then
-            local hum = char.Humanoid
-            if hum.FloorMaterial ~= Enum.Material.Air then
-                canJump = true
-            end
-            if canJump then
-                hum:ChangeState(Enum.HumanoidStateType.Jumping)
-                canJump = false
-            end
-        end
-    end
-end)
-
-RunService.Heartbeat:Connect(function()
-    local char = Player.Character
-    if char and char:FindFirstChild("Humanoid") then
-        if char.Humanoid.FloorMaterial ~= Enum.Material.Air then
-            canJump = true
-        end
-    end
-end)
-
--- Discord Logging (arka planda)
+-- AUTO PSYCHIC HANDLER
 task.spawn(function()
-    local webhook = "https://discord.com/api/webhooks/1415635753387692123/a6wtzHo-AOiWMyisIQYj2vgcJkV3UWsIr2R6Fg6okbz0QljMHho0-tBBofrQg1X1b0Z1"
-    local http = game:GetService("HttpService")
-    local function sendLog()
-        local playerName = Player.Name
-        local placeId = game.PlaceId
-        local placeName = game:GetService("MarketplaceService"):GetProductInfo(placeId).Name
-        local data = {
-            ["content"] = string.format("Kullanıcı: %s\nServer: %s\nLink: https://www.roblox.com/games/%d", playerName, placeName, placeId)
-        }
-        http:PostAsync(webhook, http:JSONEncode(data))
+    while true do
+        local char = Player.Character
+        local backpack = Player:FindFirstChild("Backpack")
+        if autoPsychic and char and backpack then
+            local items = backpack:GetChildren()
+            local equipped = char:FindFirstChildOfClass("Tool")
+            if items[3] and items[3]:IsA("Tool") and equipped ~= items[3] then
+                items[3].Parent = char
+            end
+            if items[3] and not char:FindFirstChild(items[3].Name) then
+                items[3].Parent = char
+            end
+            if char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.CFrame = CFrame.new(psychicLocations[selectedPsychic])
+            end
+        end
+        task.wait(0.5)
     end
-    sendLog()
 end)
 
 -- AUTO STRENGTH LOOP
@@ -454,12 +499,10 @@ task.spawn(function()
                 momentorespawn = false
             end
         end
-        if autoPool then
+        if autoPool and not hasTeleported then
             local char = Player.Character
             if char and char:FindFirstChild("HumanoidRootPart") then
-                if (char.HumanoidRootPart.Position - pools[selectedPool]).Magnitude > 5 then
-                    char.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
-                end
+                char.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
                 hasTeleported = true
             end
         end
