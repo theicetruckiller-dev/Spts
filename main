@@ -481,8 +481,7 @@ local function setupDeathHandler()
     connectDied()
 end
 setupDeathHandler()
-
--- AUTO POOL & RESPAWN BYPASS LOOP
+-- AUTO POOL & RESPAWN BYPASS LOOP (GÜNCELLENMİŞ: hareket/ölme durumunda geri döndürüyor)
 task.spawn(function()
     while true do
         local char = Player.Character
@@ -499,13 +498,32 @@ task.spawn(function()
                 momentorespawn = false
             end
         end
-        if autoPool and not hasTeleported then
-            local char = Player.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.CFrame = CFrame.new(pools[selectedPool])
-                hasTeleported = true
+
+        -- Auto Pool sürekli kontrol: eğer pool açık ise seçili pool koordinatına bağlı kal
+        if autoPool and pools[selectedPool] then
+            local char2 = Player.Character
+            if char2 and char2:FindFirstChild("HumanoidRootPart") then
+                local hrp = char2.HumanoidRootPart
+                local targetPos = pools[selectedPool]
+                -- uzaklık kontrolü (5 stud tolerans)
+                local dist = (hrp.Position - targetPos).Magnitude
+                if dist > 5 then
+                    -- eğer uzaklaşmışsan geri ışınla
+                    hrp.CFrame = CFrame.new(targetPos)
+                    hasTeleported = true
+                else
+                    -- istersen burada hasTeleported true tutulsun (mevcut mantığı korumak için)
+                    hasTeleported = true
+                end
+            else
+                -- karakter yoksa (ölmüş vs.) hasTeleported sıfırlansın, spawn handler zaten teleport edecek
+                hasTeleported = false
             end
+        else
+            -- autoPool kapalıysa flag sıfırlansın (orijinal davranışa uyum)
+            hasTeleported = false
         end
+
         task.wait(0.4)
     end
 end)
